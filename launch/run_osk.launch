@@ -1,5 +1,6 @@
 <launch> 
   <param name="lidar_info_path" type="string" value="/media/zz/new/myMidImg/kitti_00/out.txt" />
+  <param name="result_save_path" type="string" value="/media/zz/new/myMidImg/search_result/kitti360_02.txt" />
 
   <param name="xy_leaf_size" type="double" value="0.5" />
   <param name="z_leaf_size" type="double" value="0.2" />
@@ -21,8 +22,6 @@
   <param name="min_time_diff" type="double" value="15.0" />
   <param name="lc_dist_threshold" type="double" value="5.0" />
   <param name="similarity_threshold" type="double" value="0.4" />
-
-  <param name="result_save_path" type="string" value="/media/zz/new/myMidImg/search_result/kitti360_02.txt" />
 
   <node name="run_osk" pkg="osk" type="run_osk" output="screen" />
 

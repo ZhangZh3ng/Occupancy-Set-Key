@@ -1,6 +1,5 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 from scipy.spatial import KDTree
 
 
@@ -41,7 +40,7 @@ def read_loop_detction_result(file_path):
         lines = f1.readlines()
         for line in lines:
             line_info = line.strip().split()
-            assert len(line_info) > 3
+            assert len(line_info) >= 3
 
             idx_curr = int(line_info[0])
             idx_best = int(line_info[1])

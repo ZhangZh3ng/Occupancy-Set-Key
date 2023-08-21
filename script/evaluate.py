@@ -1,8 +1,5 @@
 import numpy as np
-import os
-import sys
 import matplotlib.pyplot as plt
-import matplotlib
 import math
 from scipy.spatial import KDTree
 import pr_tools as pr
