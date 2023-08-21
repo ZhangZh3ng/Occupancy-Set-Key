@@ -1,10 +1,11 @@
 #pragma once
 
-#include <Eigen/Dense>
-#include <Eigen/SVD>
 #include <iostream>
 #include <random>
 #include <vector>
+
+#include <Eigen/Dense>
+#include <Eigen/SVD>
 
 // Function to compute the transformation matrix given two sets of 3D points
 Eigen::Matrix4f ComputeRelativeTransformOfPoints(

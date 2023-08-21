@@ -32,14 +32,15 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr ConvertToPclPointCloud(
   return cloud_out;
 }
 
-template<typename T>
+template <typename T>
 double GetRosTime(const T& msg) {
   return msg.header.stamp.toSec();
 }
 
 template <typename T>
 void PublishCloud(const pcl::PointCloud<T>& cloud,
-                  ros::Publisher& publisher, const std_msgs::Header& header) {
+                  ros::Publisher& publisher,
+                  const std_msgs::Header& header) {
   sensor_msgs::PointCloud2 cloud_pub;
   pcl::toROSMsg(cloud, cloud_pub);
   cloud_pub.header = header;
@@ -119,34 +120,43 @@ void WriteSimiarityResult(const std::string of_path,
   file.close();
 }
 
-visualization_msgs::Marker GenerateLoopMarker(const Eigen::Matrix4f& current_pose, const Eigen::Matrix4f& history_pose, const std::string& frame_id, const int id) {
-    visualization_msgs::Marker loop_marker;
-    loop_marker.header.frame_id = frame_id; // Set the frame in which the marker will be displayed
-    loop_marker.header.stamp = ros::Time::now();
-    loop_marker.ns = "loop_closures";
-    loop_marker.id = id; // Unique ID for the marker
-    loop_marker.type = visualization_msgs::Marker::LINE_LIST;
-    loop_marker.action = visualization_msgs::Marker::ADD;
-    
-    // Set the scale of the line (e.g., line width)
-    loop_marker.scale.x = 0.1; // Line width
-    
-    // Set the color (RGBA) of the marker (green in this example)
-    loop_marker.color.r = 0.0;
-    loop_marker.color.g = 1.0;
-    loop_marker.color.b = 0.0;
-    loop_marker.color.a = 1.0;
-    
-    // Set the two endpoints of the line representing the loop closure
-    loop_marker.points.resize(2);
-    loop_marker.points[0].x = current_pose(0, 3);
-    loop_marker.points[0].y = current_pose(1, 3);
-    loop_marker.points[0].z = current_pose(2, 3);
-    loop_marker.points[1].x = history_pose(0, 3);
-    loop_marker.points[1].y = history_pose(1, 3);
-    loop_marker.points[1].z = history_pose(2, 3);
+visualization_msgs::Marker GenerateLoopMarker(
+    const Eigen::Matrix4f& current_pose,
+    const Eigen::Matrix4f& history_pose,
+    const std::string& frame_id,
+    const int id) {
+  visualization_msgs::Marker loop_marker;
+  loop_marker.header.frame_id =
+      frame_id;  // Set the frame in which the marker will be displayed
+  loop_marker.header.stamp = ros::Time::now();
+  loop_marker.ns = "loop_closures";
+  loop_marker.id = id;  // Unique ID for the marker
+  loop_marker.type = visualization_msgs::Marker::LINE_LIST;
+  loop_marker.action = visualization_msgs::Marker::ADD;
 
-    return loop_marker;
+  // Set the scale of the line (e.g., line width)
+  loop_marker.scale.x = 0.1;  // Line width
+
+  // Set the color (RGBA) of the marker (green in this example)
+  loop_marker.color.r = 0.0;
+  loop_marker.color.g = 1.0;
+  loop_marker.color.b = 0.0;
+  loop_marker.color.a = 1.0;
+
+  // Set the two endpoints of the line representing the loop closure
+  loop_marker.points.resize(2);
+  loop_marker.points[0].x = current_pose(0, 3);
+  loop_marker.points[0].y = current_pose(1, 3);
+  loop_marker.points[0].z = current_pose(2, 3);
+  loop_marker.points[1].x = history_pose(0, 3);
+  loop_marker.points[1].y = history_pose(1, 3);
+  loop_marker.points[1].z = history_pose(2, 3);
+  loop_marker.pose.orientation.w = 1;
+  loop_marker.pose.orientation.x = 0;
+  loop_marker.pose.orientation.y = 0;
+  loop_marker.pose.orientation.z = 0;
+
+  return loop_marker;
 }
 
 template <typename MatrixType>
@@ -300,11 +310,10 @@ void GeneratePointCorrelationMarkers(
   markers.markers.push_back(line_marker_fp);
 }
 
-void AddPointCorrelationMarkers(
-    const std::vector<Eigen::Vector3f>& points1,
-    const std::vector<Eigen::Vector3f>& points2,
-    visualization_msgs::MarkerArray& markers,
-    const std::string frame_id) {
+void AddPointCorrelationMarkers(const std::vector<Eigen::Vector3f>& points1,
+                                const std::vector<Eigen::Vector3f>& points2,
+                                visualization_msgs::MarkerArray& markers,
+                                const std::string frame_id) {
   // Set up markerArray for points and lines
   visualization_msgs::Marker point_marker;
   point_marker.header.frame_id = frame_id;

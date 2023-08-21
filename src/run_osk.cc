@@ -36,6 +36,7 @@ std::string result_save_path;
 ros::Publisher pub_cloud_this;
 ros::Publisher pub_ground;
 ros::Publisher pub_object;
+ros::Publisher pub_object_less;
 ros::Publisher pub_landmark;
 ros::Publisher pub_path;
 ros::Publisher pub_loop;
@@ -77,7 +78,7 @@ void RunOSKSearch() {
       new pcl::PointCloud<pcl::PointXYZI>};
   pcl::PointCloud<pcl::PointXYZI>::Ptr cloud_landmark{
       new pcl::PointCloud<pcl::PointXYZI>};
-  pcl::PointCloud<pcl::PointXYZI>::Ptr cloud_loop{
+  pcl::PointCloud<pcl::PointXYZI>::Ptr cloud_object_less{
       new pcl::PointCloud<pcl::PointXYZI>};
   pcl::PointCloud<pcl::PointXYZI>::Ptr cloud_match_raw{
       new pcl::PointCloud<pcl::PointXYZI>};
@@ -93,16 +94,16 @@ void RunOSKSearch() {
   visualization_msgs::MarkerArray loop_marker;
   visualization_msgs::MarkerArray link_marker;
 
-  OSKManager dm{xy_leaf_size,
-                z_leaf_size,
-                landmark_range_threshold,
-                landmark_occupancy_threshold,
-                landmark_mask_radius,
-                lsh_band_length,
-                lsh_band_num,
-                occupancy_context_max_range,
-                occupancy_context_redius_resolution,
-                occupancy_context_angle_resolution};
+  OSKManager osk_manager{xy_leaf_size,
+                         z_leaf_size,
+                         landmark_range_threshold,
+                         landmark_occupancy_threshold,
+                         landmark_mask_radius,
+                         lsh_band_length,
+                         lsh_band_num,
+                         occupancy_context_max_range,
+                         occupancy_context_redius_resolution,
+                         occupancy_context_angle_resolution};
 
   Timekeeper timer;
 
@@ -176,36 +177,36 @@ void RunOSKSearch() {
     }
 
     if (work_in_world_frame) {
-      dm.set_lidar_pose(T_this_to_world);
+      osk_manager.set_lidar_pose(T_this_to_world);
     }
 
     timer.Resume();
-    dm.InsertPointCloud(*cloud_this, curr_scan_id);
+    osk_manager.InsertPointCloud(*cloud_this, curr_scan_id);
     timer.Pause();
     double t1 = timer.GetLastElapsedTime() / 1000;
 
     timer.Resume();
-    dm.FindLandmarkAndObjectPoints();
+    osk_manager.FindLandmarkAndObjectPoints();
     timer.Pause();
     double t2 = timer.GetLastElapsedTime() / 1000;
 
     timer.Resume();
-    dm.MakeDescriptor();
+    osk_manager.MakeDescriptor();
     timer.Pause();
     double t3 = timer.GetLastElapsedTime() / 1000;
 
     timer.Resume();
-    dm.VoteByOSK();
+    osk_manager.VoteByOSK();
     timer.Pause();
     double t4 = timer.GetLastElapsedTime() / 1000;
 
     timer.Resume();
-    auto results = dm.GeometryCheck();
+    auto results = osk_manager.GeometryCheck();
     timer.Pause();
     double t5 = timer.GetLastElapsedTime() / 1000;
 
     timer.Resume();
-    dm.AddCurrentScanToDatabase();
+    osk_manager.AddCurrentScanToDatabase();
     timer.Pause();
     double t6 = timer.GetLastElapsedTime() / 1000;
 
@@ -229,13 +230,12 @@ void RunOSKSearch() {
     std::vector<Eigen::Vector3f> landmark_this;
     std::vector<Eigen::Vector3f> landmark_match;
     std::vector<Eigen::Vector3f> keypoints_match;
-    auto best_id = dm.GetBestOverlapMatchPairs(landmark_this, landmark_match);
-    dm.GetBestMatchLandmarks(keypoints_match);
+    auto best_id = osk_manager.GetBestOverlapMatchPairs(landmark_this, landmark_match);
+    osk_manager.GetBestMatchLandmarks(keypoints_match);
     std::cout << " find  size = " << landmark_this.size() << " matching paris. "
               << " matched frame has " << keypoints_match.size() << " keypoints"
               << std::endl;
 
-    cloud_loop->clear();
     bool detect_loop = false;
     if (!results.empty() && results.front().second > overlap_threshold) {
       detect_loop = true;
@@ -257,9 +257,9 @@ void RunOSKSearch() {
       pcl::transformPointCloud(*cloud_match_raw, *cloud_match_raw,
                                T_match_to_world);
 
-      dm.GetHistoricalRegistrationCloud(best_id, *cloud_match_origin);
+      osk_manager.GetHistoricalRegistrationCloud(best_id, *cloud_match_origin);
 
-      auto T_match_to_this = dm.GetBestRelativeTransform();
+      auto T_match_to_this = osk_manager.GetBestRelativeTransform();
       pcl::transformPointCloud(*cloud_match_origin, *cloud_match_transform,
                                T_match_to_this);
 
@@ -281,14 +281,15 @@ void RunOSKSearch() {
           T_this_to_world, T_match_to_world, "world", scan_num));
     }
 
-    dm.GetDownsampledCloud(*cloud_ds);
-    dm.GetLandmarkCloud(*cloud_landmark);
-    dm.GetObjectCloud(*cloud_object);
-    dm.GetGroundCloud(*cloud_ground);
+    osk_manager.GetDownsampledCloud(*cloud_ds);
+    osk_manager.GetLandmarkCloud(*cloud_landmark);
+    osk_manager.GetObjectCloud(*cloud_object);
+    osk_manager.GetGroundCloud(*cloud_ground);
+    osk_manager.GetObjectCloud(*cloud_object_less, false);
     std::cout << "find " << cloud_landmark->size() << " keypoints." << std::endl;
 
     if (scan_num % 20 == 0) {
-      dm.ReportParameters();
+      osk_manager.ReportParameters();
     }
 
     // current
@@ -296,6 +297,7 @@ void RunOSKSearch() {
     PublishCloud(*cloud_object, pub_object, header);
     PublishCloud(*cloud_landmark, pub_landmark, header);
     PublishCloud(*cloud_ground, pub_ground, header);
+    PublishCloud(*cloud_object_less, pub_object_less, header);
 
     // match
     PublishCloud(*cloud_match_raw, pub_cloud_match, header_world);
@@ -314,9 +316,9 @@ void RunOSKSearch() {
     scan_num += 1;
     std::cout << "frame " << scan_num << " ds size = " << cloud_ds->size()
               << std::endl;
-    dm.RecordSearchResult();
+    osk_manager.RecordSearchResult();
   }
-  dm.WriteSearchResult(result_save_path);
+  osk_manager.WriteSearchResult(result_save_path);
   std::cout << "write ok." << std::endl;
 
   while (ros::ok()) {
@@ -371,6 +373,7 @@ int main(int argc, char** argv) {
   pub_cloud_this = nh.advertise<sensor_msgs::PointCloud2>("cloud_this", 10);
   pub_ground = nh.advertise<sensor_msgs::PointCloud2>("ground", 100);
   pub_object = nh.advertise<sensor_msgs::PointCloud2>("object", 100);
+  pub_object_less = nh.advertise<sensor_msgs::PointCloud2>("object_less", 100);
   pub_landmark = nh.advertise<sensor_msgs::PointCloud2>("landmark", 100);
   pub_path = nh.advertise<nav_msgs::Path>("path", 10);
   pub_loop = nh.advertise<visualization_msgs::MarkerArray>("loop_markers", 10);

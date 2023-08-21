@@ -1,3 +1,9 @@
+/*
+  Author: Zheng Zhang
+  Created: 2023-4-12
+  Description: A simple timer
+*/
+
 #pragma once
 
 #include <chrono>

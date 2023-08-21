@@ -1,3 +1,9 @@
+/*
+  Author: Zheng Zhang
+  Created: 2023-3-20
+  Description: Tool function for read lidar point cloud form .bin file.
+*/
+
 #pragma once
 
 #include <string>

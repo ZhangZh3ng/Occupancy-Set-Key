@@ -1,3 +1,9 @@
+/*
+  Author: Zheng Zhang
+  Created: 2023-6-2
+  Description: Implementation of a point cloud based place recognition algrithm.
+*/
+
 #pragma once
 
 #include <algorithm>
@@ -16,7 +22,7 @@
 #include <Eigen/Eigen>
 
 #include "osk/hash_combine.h"
-#include "osk/psm.h"
+#include "osk/lsh.h"
 #include "osk/ransac.h"
 #include "osk/useful_tools.h"
 #include "osk/voxel_id.h"
@@ -90,7 +96,7 @@ class OSKManager {
   struct QueryItem {
     std::vector<LandmarkLocation> locations;
     int historical_scan_num = 0;
-    double score = 0.0;  // inverse document frequency
+    double score = 0.0;  // inverse document frequency(idf)
   };
 
   struct CandidateLog {
@@ -152,6 +158,17 @@ class OSKManager {
               << " num bin radius = " << occupancy_context_num_bins_redius_
               << " num bin angle = " << occupancy_context_num_bins_angle_
               << std::endl;
+  }
+
+  // the overall searching process
+  template<typename T>
+  auto FindLoop(const pcl::PointCloud<T>& cloud_in, const ScanID curr_scan_id) {
+    InsertPointCloud(cloud_in, curr_scan_id);
+    FindLandmarkAndObjectPoints();
+    MakeDescriptor();
+    VoteByOSK();
+    std::vector<std::pair<ScanID, ScoreType>> results = GeometryCheck();
+    return results;
   }
 
   template <typename T>
@@ -235,28 +252,30 @@ class OSKManager {
       auto& bev_pixel = iter->second;
 
       // object points used in overlap computation.
+      int num_object_points = 0;
       for (auto& point : bev_pixel.points) {
         if (point.z() - bev_pixel.point_bottom.z() > z_leaf_size_) {
           registration_points_.emplace_back(point);
+          ++num_object_points;
         } else {
           ground_points_.emplace_back(point);
         }
       }
 
       // filter ground area
-      if (bev_pixel.points.size() < 2) {
+      if (num_object_points < 2) {
         continue;
       }
 
-      // Find object points, we only use the top and bottom point of each pixel
-      // grid when computing occpancy context for reduce computational
-      // complexity and the registration_points_ is what we called object
-      // points.
-      if (bev_pixel.point_top.z() - bev_pixel.point_bottom.z() < z_leaf_size_) {
-        continue;
-      }
+      // Only use the top and bottom point of each pixel grid for computing
+      // occpancy context to reduce computational complexity and the
+      // registration_points_ is what we called object points.
       object_points_.emplace_back(bev_pixel.point_top);
       object_points_.emplace_back(bev_pixel.point_bottom);
+
+      if (num_object_points < landmark_occupancy_threshold_) {
+        continue;
+      }
 
       // Find landmark, firstly check if fullfill landmark condition
       auto dist_to_center =
@@ -289,7 +308,7 @@ class OSKManager {
           for (auto& objpoint : object_points_) {
             const Eigen::Vector2f& p1 = landmark.point.block<2, 1>(0, 0);
             const Eigen::Vector2f& p2 = objpoint.block<2, 1>(0, 0);
-            int z = 1;
+            int z = 1;  // current, not use z
             // z = static_cast<int>(
             //     (objpoint.z() - landmark.point.z() / z_leaf_size_));
 
@@ -336,7 +355,7 @@ class OSKManager {
               const auto& row = bin_id.x();
               const auto& col = bin_id.y();
               // type is used to distinguish different types of information
-              const auto& type = bin_id.z();
+              const auto& type = 1;
               int col_shifted = col - first_col;
               if (col_shifted < 0) {
                 col_shifted += occupancy_context_num_bins_angle_;
@@ -346,28 +365,13 @@ class OSKManager {
               hash_combine(seed, type, row, col_shifted);
               landmark.set.emplace_back(seed);
             }
-            break;
+            break; // only try once(the max occupancy direction)
           }
 
           // compute osk
           landmark.signature = min_hash_(landmark.set);
-          landmark.query_key = QueryLSH(landmark.signature, lsh_band_length_);
+          landmark.query_key = BandLSH(landmark.signature, lsh_band_length_);
         });
-  }
-
-  // Locality sensitive hash function for convert min hash signature into
-  // query key, i.e. what we call Occupancy Set Key(OSK)
-  std::vector<std::size_t> QueryLSH(const std::vector<std::size_t>& signature,
-                                    const int n = 5) {
-    std::vector<std::size_t> query_key;
-    for (std::size_t i = 0; i <= signature.size() - n; i += n) {
-      std::size_t seed = 0;
-      for (int j = 0; j < n; ++j) {
-        hash_combine(seed, signature[i + j]);
-      }
-      query_key.emplace_back(seed);
-    }
-    return query_key;
   }
 
   std::vector<std::pair<ScanID, ScoreType>> VoteByOSK() {

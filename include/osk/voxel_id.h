@@ -1,3 +1,9 @@
+/*
+  Author: Zheng Zhang
+  Created: 2023-5-11
+  Description: A simple index to indicate 3D voxel's ID
+*/
+
 #pragma once
 
 #include <vector>

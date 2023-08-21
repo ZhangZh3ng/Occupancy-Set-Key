@@ -3,8 +3,8 @@
 #include <fstream>
 #include <iostream>
 #include <map>
-#include <unordered_map>
 #include <sstream>
+#include <unordered_map>
 #include <vector>
 
 #include <Eigen/Dense>
@@ -20,9 +20,7 @@ class DataReader {
 
   DataReader(const std::string& file_path) { ParseFile(file_path); }
 
-  const auto& GetCurrentScanInfo() const {
-    return *iter_curr_;
-  }
+  const auto& GetCurrentScanInfo() const { return *iter_curr_; }
 
   bool MoveToNextScan() {
     if (iter_curr_ != scan_infos_.end()) {
@@ -40,7 +38,7 @@ class DataReader {
     }
   }
 
-  auto GetScanInfo(const int scan_id)  {
+  auto GetScanInfo(const int scan_id) {
     auto result = scan_infos_dictionary_[scan_id];
     return result;
   }
