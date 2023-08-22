@@ -267,23 +267,23 @@ class OSKManager {
         continue;
       }
 
-      // Only use the top and bottom point of each pixel grid for computing
-      // occpancy context to reduce computational complexity and the
-      // registration_points_ is what we called object points.
+      // Only use the top and bottom point of each pixel grid when computing
+      // occpancy context, registration_points_ is the full object points
       object_points_.emplace_back(bev_pixel.point_top);
       object_points_.emplace_back(bev_pixel.point_bottom);
 
+      // Find landmark, first check if has qualification
       if (num_object_points < landmark_occupancy_threshold_) {
         continue;
       }
 
-      // Find landmark, firstly check if fullfill landmark condition
       auto dist_to_center =
           (bev_pixel.point_bottom - lidar_pose_.block<3, 1>(0, 3)).norm();
       if (bev_pixel.points.size() < landmark_occupancy_threshold_ ||
           dist_to_center > landmark_range_threshold_) {
         continue;
       }
+
       // check if it has been masked before.
       if (masked_ids.find(bev_id) != masked_ids.end()) {
         continue;
@@ -333,17 +333,16 @@ class OSKManager {
 
             ID3D bin_id{bin_radius_id, bin_angle_id, z};
             auto success_insert = landmark.occupied_ids.insert(bin_id).second;
-            if (success_insert) {
+            // if (success_insert) {
               landmark.fill_rate[bin_angle_id] += 1;
-            }
+            // }
           }
 
           // Create a vector of column indices for find pivot column
           std::vector<int> column_ids(occupancy_context_num_bins_angle_);
           std::iota(column_ids.begin(), column_ids.end(), 0);
 
-          // Sort the column indices based on their fill rate using a lambda
-          // function
+          // Sort the column indices based on their fill rate
           std::sort(
               column_ids.begin(), column_ids.end(), [&](int col1, int col2) {
                 return landmark.fill_rate[col1] > landmark.fill_rate[col2];
@@ -400,7 +399,7 @@ class OSKManager {
 
             const auto& queried_item = iter->second;
             for (const auto& location : queried_item.locations) {
-              if (curr_scan_id_ - location.scan_id < num_exclude_near_frame_) {
+              if (curr_scan_id_ - location.scan_id < num_exclude_near_scan_) {
                 continue;
               }
 
@@ -576,12 +575,12 @@ class OSKManager {
 
     // save point info of current scan
     historical_scans_[curr_scan_id_] = std::make_unique<HistoricalScan>();
-    auto& curr_frame_info = *(historical_scans_[curr_scan_id_]);
-    curr_frame_info.landmarks.reserve(landmarks_.size());
+    auto& curr_scan_info = *(historical_scans_[curr_scan_id_]);
+    curr_scan_info.landmarks.reserve(landmarks_.size());
     for (auto& keypoint : landmarks_) {
-      curr_frame_info.landmarks.emplace_back(keypoint.point);
+      curr_scan_info.landmarks.emplace_back(keypoint.point);
     }
-    curr_frame_info.registration_points = registration_points_;
+    curr_scan_info.registration_points = registration_points_;
   }
 
   ScanID GetBestVoteMatchPairs(std::vector<Eigen::Vector3f>& points_curr,
@@ -601,6 +600,15 @@ class OSKManager {
           matched_database->landmarks[pair.match_point_id]);
     }
 
+    return best_match_id;
+  }
+
+  ScanID GetBestOverlapID() {
+    if (candidate_scan_overlap_scores_.empty()) {
+      return -1;
+    }
+
+    const auto& best_match_id = candidate_scan_overlap_scores_.front().first;
     return best_match_id;
   }
 
@@ -630,8 +638,8 @@ class OSKManager {
     }
 
     landmarks.clear();
-    auto& best_match_frame = historical_scans_[best_match_scan_id_];
-    for (auto& point : best_match_frame->landmarks) {
+    auto& best_match_scan = historical_scans_[best_match_scan_id_];
+    for (auto& point : best_match_scan->landmarks) {
       landmarks.emplace_back(point);
     }
   }
@@ -846,7 +854,8 @@ class OSKManager {
 
   ScanID curr_scan_id_ = -1;
   ScanID best_match_scan_id_ = -1;
-  int num_exclude_near_frame_ = 300;
+  // use scan id for adjacent scan exclusion
+  int num_exclude_near_scan_ = 300;
   int max_candidate_num_ = 10;
   double overlap_grid_size_ = 0.5;
   std::unordered_map<ScanID, std::vector<CorrespondencePair>>

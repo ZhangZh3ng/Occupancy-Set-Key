@@ -3,20 +3,20 @@
 #include <iostream>
 #include <thread>
 
-#include <pcl/point_cloud.h>
-#include <pcl/point_types.h>
+#include <nav_msgs/Path.h>
 #include <pcl/common/transforms.h>
 #include <pcl/filters/voxel_grid.h>
+#include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
 #include <ros/ros.h>
-#include <visualization_msgs/MarkerArray.h>
 #include <sensor_msgs/PointCloud2.h>
-#include <nav_msgs/Path.h>
+#include <visualization_msgs/MarkerArray.h>
 
+#include "osk/data_reader.h"
 #include "osk/kitti.h"
 #include "osk/osk.h"
 #include "osk/timekeeper.h"
 #include "osk/useful_tools.h"
-#include "osk/data_reader.h"
 
 std::string fpath_gt_pose, fpath_lidar;
 std::string lidar_info_path;
@@ -85,9 +85,9 @@ void RunOSKSearch() {
   pcl::PointCloud<pcl::PointXYZI>::Ptr cloud_match_transform{
       new pcl::PointCloud<pcl::PointXYZI>};
   pcl::PointCloud<pcl::PointXYZI>::Ptr cloud_match_origin{
-          new pcl::PointCloud<pcl::PointXYZI>};
+      new pcl::PointCloud<pcl::PointXYZI>};
   pcl::PointCloud<pcl::PointXYZI>::Ptr cloud_match_origin_add{
-          new pcl::PointCloud<pcl::PointXYZI>};
+      new pcl::PointCloud<pcl::PointXYZI>};
 
   std::string fp_des = "/media/zz/new/myMidImg/des/";
 
@@ -132,12 +132,12 @@ void RunOSKSearch() {
     ReadLidarFromKittiBin(reader.GetCurrentScanInfo().file_path, *cloud_raw);
 
     PublishTF(broadcaster_this,
-              reader.GetCurrentScanInfo().transformation.cast<float>(),
-              "world", "lidar");
+              reader.GetCurrentScanInfo().transformation.cast<float>(), "world",
+              "lidar");
 
     // add path
     auto pose = reader.GetCurrentScanInfo().transformation;
-    Eigen::Vector3d translation = pose.block<3, 1>(0,3);
+    Eigen::Vector3d translation = pose.block<3, 1>(0, 3);
     geometry_msgs::Point point;
     point.x = translation.x();
     point.y = translation.y();
@@ -166,7 +166,7 @@ void RunOSKSearch() {
       (*cloud_this) = (*cloud_raw);
       header.frame_id = "lidar";
     }
-    
+
     header_world = header;
     header_world.frame_id = "world";
 
@@ -218,19 +218,21 @@ void RunOSKSearch() {
 
     // result process
     if (!results.empty()) {
-      std::cout << "=== current scan id = " << reader.GetCurrentScanInfo().scan_id
-                << std::endl;
+      std::cout << "=== current scan id = "
+                << reader.GetCurrentScanInfo().scan_id << std::endl;
       for (const auto& result : results) {
         auto& matched_scan_id = result.first;
         auto& score = result.second;
-        std::cout << "Scan ID: " << matched_scan_id << ", Score: " << score << std::endl;
+        std::cout << "Scan ID: " << matched_scan_id << ", Score: " << score
+                  << std::endl;
       }
     }
 
     std::vector<Eigen::Vector3f> landmark_this;
     std::vector<Eigen::Vector3f> landmark_match;
     std::vector<Eigen::Vector3f> keypoints_match;
-    auto best_id = osk_manager.GetBestOverlapMatchPairs(landmark_this, landmark_match);
+    auto best_id =
+        osk_manager.GetBestOverlapMatchPairs(landmark_this, landmark_match);
     osk_manager.GetBestMatchLandmarks(keypoints_match);
     std::cout << " find  size = " << landmark_this.size() << " matching paris. "
               << " matched frame has " << keypoints_match.size() << " keypoints"
@@ -274,8 +276,8 @@ void RunOSKSearch() {
       pcl::transformPointCloud(*cloud_match_origin, *cloud_match_origin_add,
                                T_match_add);
 
-      GeneratePointCorrelationMarkers(landmark_this, landmark_match, link_marker,
-                                      "lidar");
+      GeneratePointCorrelationMarkers(landmark_this, landmark_match,
+                                      link_marker, "lidar");
 
       loop_marker.markers.push_back(GenerateLoopMarker(
           T_this_to_world, T_match_to_world, "world", scan_num));
@@ -286,7 +288,8 @@ void RunOSKSearch() {
     osk_manager.GetObjectCloud(*cloud_object);
     osk_manager.GetGroundCloud(*cloud_ground);
     osk_manager.GetObjectCloud(*cloud_object_less, false);
-    std::cout << "find " << cloud_landmark->size() << " keypoints." << std::endl;
+    std::cout << "find " << cloud_landmark->size() << " keypoints."
+              << std::endl;
 
     if (scan_num % 20 == 0) {
       osk_manager.ReportParameters();

@@ -1,5 +1,5 @@
 <launch> 
-  <param name="lidar_info_path" type="string" value="/media/zz/new/myMidImg/kitti_00/out.txt" />
+  <param name="lidar_info_path" type="string" value="/media/zz/new/myMidImg/kitti_08/out.txt" />
   <param name="result_save_path" type="string" value="/media/zz/new/myMidImg/search_result/kitti360_02.txt" />
 
   <param name="xy_leaf_size" type="double" value="0.5" />
