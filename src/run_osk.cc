@@ -18,7 +18,6 @@
 #include "osk/timekeeper.h"
 #include "osk/useful_tools.h"
 
-std::string fpath_gt_pose, fpath_lidar;
 std::string lidar_info_path;
 double xy_leaf_size, z_leaf_size;
 double landmark_range_threshold;
@@ -33,6 +32,8 @@ bool enable_pre_downsample;
 double overlap_threshold;
 std::string result_save_path;
 
+double loop_dist_threshold;
+
 ros::Publisher pub_cloud_this;
 ros::Publisher pub_ground;
 ros::Publisher pub_object;
@@ -46,6 +47,8 @@ ros::Publisher pub_matched_keypoints;
 ros::Publisher pub_cloud_match_origin;
 ros::Publisher pub_cloud_match_origin_add;
 ros::Publisher pub_cloud_match_transform;
+ros::Publisher pub_path2;
+ros::Publisher pub_loop_fp;
 
 std::atomic<bool> is_running{true};
 void PauseControl() {
@@ -91,7 +94,7 @@ void RunOSKSearch() {
 
   std::string fp_des = "/media/zz/new/myMidImg/des/";
 
-  visualization_msgs::MarkerArray loop_marker;
+  visualization_msgs::MarkerArray loop_marker, loop_marker_fp;
   visualization_msgs::MarkerArray link_marker;
 
   OSKManager osk_manager{xy_leaf_size,
@@ -107,8 +110,10 @@ void RunOSKSearch() {
 
   Timekeeper timer;
 
-  nav_msgs::Path path;
+  Eigen::Vector3f t_add = Eigen::Vector3f{0, 0, 10};
+  nav_msgs::Path path, path2;
   path.header.frame_id = "world";
+  path2.header.frame_id = "world";
   std_msgs::Header header, header_world;
 
   tf::TransformBroadcaster broadcaster_this, broadcaster_match;
@@ -123,8 +128,7 @@ void RunOSKSearch() {
       std::this_thread::yield();
     }
 
-    bool has_new_scan = reader.MoveToNextScan();
-    if (!has_new_scan) {
+    if (!reader.CurrentScanIsValid()) {
       std::cout << "all scan has been processed, exit." << std::endl;
       break;
     }
@@ -138,13 +142,21 @@ void RunOSKSearch() {
     // add path
     auto pose = reader.GetCurrentScanInfo().transformation;
     Eigen::Vector3d translation = pose.block<3, 1>(0, 3);
-    geometry_msgs::Point point;
+    geometry_msgs::Point point, point2;
     point.x = translation.x();
     point.y = translation.y();
     point.z = translation.z();
     path.poses.emplace_back();
     path.poses.back().pose.position = point;
     path.header.stamp = ros::Time::now();
+
+    // make path2 higher
+    point2.x = point.x + t_add.x();
+    point2.y = point.y + t_add.y();
+    point2.z = point.z + t_add.z();
+    path2.poses.emplace_back();
+    path2.poses.back().pose.position = point2;
+    path2.header = path.header;
 
     int curr_scan_id = reader.GetCurrentScanInfo().scan_id;
     std::string des_path =
@@ -266,7 +278,6 @@ void RunOSKSearch() {
                                T_match_to_this);
 
       // landmark correlation.
-      Eigen::Vector3f t_add = Eigen::Vector3f{0, 0, 10};
       for (auto& point : landmark_match) {
         point += t_add;
       }
@@ -279,8 +290,19 @@ void RunOSKSearch() {
       GeneratePointCorrelationMarkers(landmark_this, landmark_match,
                                       link_marker, "lidar");
 
-      loop_marker.markers.push_back(GenerateLoopMarker(
-          T_this_to_world, T_match_to_world, "world", scan_num));
+      // make node match higher for visualization.
+      bool is_tp = (T_match_to_world.block<3, 1>(0, 3) -
+                    T_this_to_world.block<3, 1>(0, 3))
+                       .norm() < loop_dist_threshold;
+      T_match_to_world.block<3, 1>(0, 3) += t_add;
+      if (is_tp) {
+        loop_marker.markers.push_back(GenerateLoopMarker(
+            T_this_to_world, T_match_to_world, "world", scan_num));
+      } else {
+        loop_marker_fp.markers.push_back(
+            GenerateLoopMarker(T_this_to_world, T_match_to_world, "world",
+                               scan_num, Eigen::Vector4f{1, 0, 0, 1}));
+      }
     }
 
     osk_manager.GetDownsampledCloud(*cloud_ds);
@@ -314,12 +336,20 @@ void RunOSKSearch() {
 
     pub_link_marker.publish(link_marker);
     pub_loop.publish(loop_marker);
+    pub_loop_fp.publish(loop_marker_fp);
     pub_path.publish(path);
+    pub_path2.publish(path2);
 
     scan_num += 1;
     std::cout << "frame " << scan_num << " ds size = " << cloud_ds->size()
               << std::endl;
     osk_manager.RecordSearchResult();
+
+    // go to next scan
+    if (!reader.TryMoveToNextScan()) {
+      std::cout << "all scan has been processed, exit." << std::endl;
+      break;
+    }
   }
   osk_manager.WriteSearchResult(result_save_path);
   std::cout << "write ok." << std::endl;
@@ -339,7 +369,9 @@ void RunOSKSearch() {
 
     pub_link_marker.publish(link_marker);
     pub_loop.publish(loop_marker);
+    pub_loop_fp.publish(loop_marker_fp);
     pub_path.publish(path);
+    pub_path2.publish(path2);
 
     std::cout << "path length = " << path.poses.size() << std::endl;
     std::this_thread::sleep_for(std::chrono::seconds(1));
@@ -350,8 +382,6 @@ int main(int argc, char** argv) {
   ros::init(argc, argv, "run_osk");
   ros::NodeHandle nh;
 
-  nh.param<std::string>("fpath_gt_pose", fpath_gt_pose, "");
-  nh.param<std::string>("fpath_lidar", fpath_lidar, "");
   nh.param<std::string>("lidar_info_path", lidar_info_path, "");
 
   nh.param<double>("xy_leaf_size", xy_leaf_size, 0.3);
@@ -372,6 +402,7 @@ int main(int argc, char** argv) {
   nh.param<bool>("enable_pre_downsample", enable_pre_downsample, false);
   nh.param<double>("overlap_threshold", overlap_threshold, 0.5);
   nh.param<std::string>("result_save_path", result_save_path, "");
+  nh.param<double>("loop_dist_threshold", loop_dist_threshold, 10);
 
   pub_cloud_this = nh.advertise<sensor_msgs::PointCloud2>("cloud_this", 10);
   pub_ground = nh.advertise<sensor_msgs::PointCloud2>("ground", 100);
@@ -379,7 +410,9 @@ int main(int argc, char** argv) {
   pub_object_less = nh.advertise<sensor_msgs::PointCloud2>("object_less", 100);
   pub_landmark = nh.advertise<sensor_msgs::PointCloud2>("landmark", 100);
   pub_path = nh.advertise<nav_msgs::Path>("path", 10);
+  pub_path2 = nh.advertise<nav_msgs::Path>("path2", 10);
   pub_loop = nh.advertise<visualization_msgs::MarkerArray>("loop_markers", 10);
+  pub_loop_fp = nh.advertise<visualization_msgs::MarkerArray>("loop_markers_fp", 10);
   pub_link_marker =
       nh.advertise<visualization_msgs::MarkerArray>("line_markers", 10);
   pub_matched_keypoints =
@@ -396,8 +429,6 @@ int main(int argc, char** argv) {
   std::thread thread_pause_control(PauseControl);
 
   RunOSKSearch();
-
-  thread_pause_control.join();
 
   return 0;
 }

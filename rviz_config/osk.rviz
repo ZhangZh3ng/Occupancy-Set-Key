@@ -5,7 +5,6 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /Global Options1
-        - /loop_marker1/Namespaces1
       Splitter Ratio: 0.6499999761581421
     Tree Height: 670
   - Class: rviz/Selection
@@ -314,14 +313,6 @@ Visualization Manager:
         points: true
       Queue Size: 100
       Value: true
-    - Class: rviz/MarkerArray
-      Enabled: true
-      Marker Topic: /loop_markers
-      Name: loop_marker
-      Namespaces:
-        loop_closures: true
-      Queue Size: 100
-      Value: true
     - Alpha: 1
       Buffer Length: 1
       Class: rviz/Path
@@ -345,6 +336,46 @@ Visualization Manager:
       Shaft Length: 0.10000000149011612
       Topic: /path
       Unreliable: false
+      Value: true
+    - Alpha: 1
+      Buffer Length: 1
+      Class: rviz/Path
+      Color: 32; 74; 135
+      Enabled: true
+      Head Diameter: 0.30000001192092896
+      Head Length: 0.20000000298023224
+      Length: 0.30000001192092896
+      Line Style: Lines
+      Line Width: 0.029999999329447746
+      Name: Path2
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0
+      Pose Color: 255; 85; 255
+      Pose Style: None
+      Queue Size: 10
+      Radius: 0.029999999329447746
+      Shaft Diameter: 0.10000000149011612
+      Shaft Length: 0.10000000149011612
+      Topic: /path2
+      Unreliable: false
+      Value: true
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /loop_markers
+      Name: loop_marker
+      Namespaces:
+        loop_closures: true
+      Queue Size: 100
+      Value: true
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /loop_markers_fp
+      Name: loop_marker_fp
+      Namespaces:
+        loop_closures: true
+      Queue Size: 100
       Value: true
     - Alpha: 1
       Class: rviz/Axes
@@ -383,7 +414,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 498.83770751953125
+      Distance: 492.2143249511719
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -391,17 +422,17 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: 186.8436737060547
-        Y: -109.02501678466797
-        Z: 15.236055374145508
+        X: 215.12850952148438
+        Y: 21.39271354675293
+        Z: -100.92936706542969
       Focal Shape Fixed Size: false
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.5697963237762451
+      Pitch: 1.124796986579895
       Target Frame: <Fixed Frame>
-      Yaw: 3.208585500717163
+      Yaw: 3.1935877799987793
     Saved: ~
 Window Geometry:
   Displays:

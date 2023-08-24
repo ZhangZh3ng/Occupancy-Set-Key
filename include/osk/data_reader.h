@@ -22,20 +22,17 @@ class DataReader {
 
   const auto& GetCurrentScanInfo() const { return *iter_curr_; }
 
-  bool MoveToNextScan() {
-    if (iter_curr_ != scan_infos_.end()) {
-      ++iter_curr_;
-    } else {
-      std::cout << "All scan has been read." << std::endl;
+  bool CurrentScanIsValid() const {
+    return iter_curr_ != scan_infos_.end();
+  }
+
+  bool TryMoveToNextScan() {
+    if (iter_curr_ == scan_infos_.end()) {
       return false;
     }
 
-    if (iter_curr_ == scan_infos_.end()) {
-      std::cout << "All scan has been read" << std::endl;
-      return false;
-    } else {
-      return true;
-    }
+    ++iter_curr_;
+    return true;
   }
 
   auto GetScanInfo(const int scan_id) {

@@ -95,7 +95,6 @@ def comput_pr_points(fp_gt_sens_poses, outcome, thres_dist=10, thres_time=30):
 
     # the sensor poses must be ordered by time/creation/acquisition
     gt_pose, frame_ids, timestamps = get_gt_sens_poses(fp_gt_sens_poses)
-    print(frame_ids[0])
 
     # gt_positive indicate if this scan has a positive loop pair
     gt_positive = np.zeros(gt_pose.shape[0])

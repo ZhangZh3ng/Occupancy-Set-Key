@@ -10,6 +10,7 @@
 #include <fstream>
 #include <iostream>
 #include <vector>
+#include <iomanip>
 
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>

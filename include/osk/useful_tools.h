@@ -11,6 +11,7 @@
 #include <ros/ros.h>
 #include <tf/transform_broadcaster.h>
 #include <visualization_msgs/Marker.h>
+#include <visualization_msgs/MarkerArray.h>
 #include <Eigen/Core>
 #include <Eigen/Dense>
 
@@ -124,7 +125,8 @@ visualization_msgs::Marker GenerateLoopMarker(
     const Eigen::Matrix4f& current_pose,
     const Eigen::Matrix4f& history_pose,
     const std::string& frame_id,
-    const int id) {
+    const int id,
+    const Eigen::Vector4f rgba = Eigen::Vector4f{0, 1, 0, 1}) {
   visualization_msgs::Marker loop_marker;
   loop_marker.header.frame_id =
       frame_id;  // Set the frame in which the marker will be displayed
@@ -138,10 +140,10 @@ visualization_msgs::Marker GenerateLoopMarker(
   loop_marker.scale.x = 0.1;  // Line width
 
   // Set the color (RGBA) of the marker (green in this example)
-  loop_marker.color.r = 0.0;
-  loop_marker.color.g = 1.0;
-  loop_marker.color.b = 0.0;
-  loop_marker.color.a = 1.0;
+  loop_marker.color.r = rgba[0];
+  loop_marker.color.g = rgba[1];
+  loop_marker.color.b = rgba[2];
+  loop_marker.color.a = rgba[3];
 
   // Set the two endpoints of the line representing the loop closure
   loop_marker.points.resize(2);

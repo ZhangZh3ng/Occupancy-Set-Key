@@ -7,11 +7,10 @@
 #pragma once
 
 #include <algorithm>
-#include <bitset>
 #include <execution>
 #include <fstream>
 #include <iostream>
-#include <queue>
+#include <memory>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
@@ -161,7 +160,7 @@ class OSKManager {
   }
 
   // the overall searching process
-  template<typename T>
+  template <typename T>
   auto FindLoop(const pcl::PointCloud<T>& cloud_in, const ScanID curr_scan_id) {
     InsertPointCloud(cloud_in, curr_scan_id);
     FindLandmarkAndObjectPoints();
@@ -334,7 +333,7 @@ class OSKManager {
             ID3D bin_id{bin_radius_id, bin_angle_id, z};
             auto success_insert = landmark.occupied_ids.insert(bin_id).second;
             // if (success_insert) {
-              landmark.fill_rate[bin_angle_id] += 1;
+            landmark.fill_rate[bin_angle_id] += 1;
             // }
           }
 
@@ -364,7 +363,7 @@ class OSKManager {
               hash_combine(seed, type, row, col_shifted);
               landmark.set.emplace_back(seed);
             }
-            break; // only try once(the max occupancy direction)
+            break;  // only try once(the max occupancy direction)
           }
 
           // compute osk

@@ -1,7 +1,16 @@
+/*
+  Author: Zheng Zhang
+  Description: hash_combine algorithm is used for generating random hash value of
+  two input value, it comes from boost
+  library(https://www.boost.org/doc/libs/1_55_0/doc/html/hash/reference.html#header.boost.functional.hash_hpp).
+  We separated it for the convenience of users without a boost library and added
+  a recursive version to make it easier to use
+*/
+
 #pragma once
 
-#include <utility>
 #include <functional>
+#include <utility>
 
 // Template function to combine multiple hash values
 template <typename T>
