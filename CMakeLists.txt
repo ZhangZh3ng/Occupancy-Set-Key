@@ -22,7 +22,6 @@ catkin_package(
 )
 
 find_package(PCL REQUIRED)
-find_package(TBB REQUIRED)
 find_package(Eigen3 REQUIRED)
 
 include_directories(
@@ -34,7 +33,6 @@ include_directories(
 
 add_executable(run_osk src/run_osk.cc)
 target_link_libraries(run_osk
-    TBB::tbb
     ${PCL_LIBRARIES}
     ${catkin_LIBRARIES}
     )

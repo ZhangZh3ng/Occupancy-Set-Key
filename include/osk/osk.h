@@ -7,7 +7,6 @@
 #pragma once
 
 #include <algorithm>
-#include <execution>
 #include <fstream>
 #include <iostream>
 #include <memory>
@@ -302,8 +301,7 @@ class OSKManager {
 
   void MakeDescriptor() {
     std::for_each(
-        std::execution::par_unseq, landmarks_.begin(), landmarks_.end(),
-        [&](LandmarkPoint& landmark) {
+        landmarks_.begin(), landmarks_.end(), [&](LandmarkPoint& landmark) {
           for (auto& objpoint : object_points_) {
             const Eigen::Vector2f& p1 = landmark.point.block<2, 1>(0, 0);
             const Eigen::Vector2f& p2 = objpoint.block<2, 1>(0, 0);
@@ -383,7 +381,7 @@ class OSKManager {
         matches_of_points(landmarks_.size());
 
     std::for_each(
-        std::execution::par_unseq, curr_point_ids.begin(), curr_point_ids.end(),
+        curr_point_ids.begin(), curr_point_ids.end(),
         [&](const std::size_t curr_point_id) {
           const auto& keypoint = landmarks_[curr_point_id];
           auto& matches = matches_of_points[curr_point_id];
@@ -481,44 +479,42 @@ class OSKManager {
     auto occupy_set_curr = ConvertToOccupySet(registration_points_);
     std::vector<int> indices(candidate_scan_vote_scores_.size());
     std::iota(indices.begin(), indices.end(), 0);
-    std::for_each(
-        std::execution::par_unseq, indices.begin(), indices.end(),
-        [&](const int i) {
-          auto& scan_id = candidate_scan_vote_scores_[i].first;
-          auto& correspondences = historical_scan_correspondences_[scan_id];
-          auto& matched_scan = *(historical_scans_[scan_id]);
-          auto& log = candidate_logs_[scan_id];
+    std::for_each(indices.begin(), indices.end(), [&](const int i) {
+      auto& scan_id = candidate_scan_vote_scores_[i].first;
+      auto& correspondences = historical_scan_correspondences_[scan_id];
+      auto& matched_scan = *(historical_scans_[scan_id]);
+      auto& log = candidate_logs_[scan_id];
 
-          if (correspondences.size() < 4) {
-            return;
-          }
+      if (correspondences.size() < 4) {
+        return;
+      }
 
-          std::vector<Eigen::Vector2f> source;
-          std::vector<Eigen::Vector2f> target;
-          target.reserve(correspondences.size());
-          source.reserve(correspondences.size());
-          for (auto& pair : correspondences) {
-            source.emplace_back(
-                matched_scan.landmarks[pair.match_point_id].head<2>());
-            target.emplace_back(landmarks_[pair.curr_point_id].point.head<2>());
-          }
+      std::vector<Eigen::Vector2f> source;
+      std::vector<Eigen::Vector2f> target;
+      target.reserve(correspondences.size());
+      source.reserve(correspondences.size());
+      for (auto& pair : correspondences) {
+        source.emplace_back(
+            matched_scan.landmarks[pair.match_point_id].head<2>());
+        target.emplace_back(landmarks_[pair.curr_point_id].point.head<2>());
+      }
 
-          int num_ransac_inliers = 0;
-          auto T2D = RANSAC(source, target, 30, 1.0, num_ransac_inliers);
-          auto T3D = Convert2DTransformationTo3D(T2D);
-          log.num_ransac_inliers = num_ransac_inliers;
-          log.relative_transformation = T3D;
+      int num_ransac_inliers = 0;
+      auto T2D = RANSAC(source, target, 30, 1.0, num_ransac_inliers);
+      auto T3D = Convert2DTransformationTo3D(T2D);
+      log.num_ransac_inliers = num_ransac_inliers;
+      log.relative_transformation = T3D;
 
-          auto& cloud = historical_scans_[scan_id]->registration_points;
-          auto transformed_cloud = TransformPoints(cloud, T3D);
+      auto& cloud = historical_scans_[scan_id]->registration_points;
+      auto transformed_cloud = TransformPoints(cloud, T3D);
 
-          auto occupy_set_match = ConvertToOccupySet(transformed_cloud);
-          double overlap_score =
-              ComputeJaccardSimilarity(occupy_set_match, occupy_set_curr);
-          scan_overlap_scores[i].second = overlap_score;
+      auto occupy_set_match = ConvertToOccupySet(transformed_cloud);
+      double overlap_score =
+          ComputeJaccardSimilarity(occupy_set_match, occupy_set_curr);
+      scan_overlap_scores[i].second = overlap_score;
 
-          log.overlap_score = overlap_score;
-        });
+      log.overlap_score = overlap_score;
+    });
 
     std::sort(scan_overlap_scores.begin(), scan_overlap_scores.end(),
               [&](auto& lsh, auto& rhs) { return lsh.second > rhs.second; });
@@ -560,17 +556,16 @@ class OSKManager {
     // update score(inverse document frequency)
     std::vector<int> lsh_part_ids(lsh_band_num_);
     std::iota(lsh_part_ids.begin(), lsh_part_ids.end(), 0);
-    std::for_each(std::execution::par_unseq, lsh_part_ids.begin(),
-                  lsh_part_ids.end(), [&](const int i) {
-                    auto& dictionary = query_dictionaries_[i];
-                    auto& visted_keys = visited_keys_of_lsh_part[i];
-                    for (auto& key : visted_keys) {
-                      auto& item = dictionary[key];
-                      item.historical_scan_num += 1;
-                      item.score = std::log(double(total_scan_num) /
-                                            double(item.historical_scan_num));
-                    }
-                  });
+    std::for_each(lsh_part_ids.begin(), lsh_part_ids.end(), [&](const int i) {
+      auto& dictionary = query_dictionaries_[i];
+      auto& visted_keys = visited_keys_of_lsh_part[i];
+      for (auto& key : visted_keys) {
+        auto& item = dictionary[key];
+        item.historical_scan_num += 1;
+        item.score =
+            std::log(double(total_scan_num) / double(item.historical_scan_num));
+      }
+    });
 
     // save point info of current scan
     historical_scans_[curr_scan_id_] = std::make_unique<HistoricalScan>();
