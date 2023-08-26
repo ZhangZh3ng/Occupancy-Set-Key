@@ -294,13 +294,14 @@ void RunOSKSearch() {
       bool is_tp = (T_match_to_world.block<3, 1>(0, 3) -
                     T_this_to_world.block<3, 1>(0, 3))
                        .norm() < loop_dist_threshold;
-      T_match_to_world.block<3, 1>(0, 3) += t_add;
+      auto T_this_to_world_add = T_this_to_world;
+      T_this_to_world_add.block<3, 1>(0, 3) += t_add;
       if (is_tp) {
         loop_marker.markers.push_back(GenerateLoopMarker(
-            T_this_to_world, T_match_to_world, "world", scan_num));
+            T_this_to_world_add, T_match_to_world, "world", scan_num));
       } else {
         loop_marker_fp.markers.push_back(
-            GenerateLoopMarker(T_this_to_world, T_match_to_world, "world",
+            GenerateLoopMarker(T_this_to_world_add, T_match_to_world, "world",
                                scan_num, Eigen::Vector4f{1, 0, 0, 1}));
       }
     }
@@ -309,7 +310,7 @@ void RunOSKSearch() {
     osk_manager.GetLandmarkCloud(*cloud_landmark);
     osk_manager.GetObjectCloud(*cloud_object);
     osk_manager.GetGroundCloud(*cloud_ground);
-    osk_manager.GetObjectCloud(*cloud_object_less, false);
+    osk_manager.GetObjectLessCloud(*cloud_object_less);
     std::cout << "find " << cloud_landmark->size() << " keypoints."
               << std::endl;
 
@@ -412,7 +413,8 @@ int main(int argc, char** argv) {
   pub_path = nh.advertise<nav_msgs::Path>("path", 10);
   pub_path2 = nh.advertise<nav_msgs::Path>("path2", 10);
   pub_loop = nh.advertise<visualization_msgs::MarkerArray>("loop_markers", 10);
-  pub_loop_fp = nh.advertise<visualization_msgs::MarkerArray>("loop_markers_fp", 10);
+  pub_loop_fp =
+      nh.advertise<visualization_msgs::MarkerArray>("loop_markers_fp", 10);
   pub_link_marker =
       nh.advertise<visualization_msgs::MarkerArray>("line_markers", 10);
   pub_matched_keypoints =

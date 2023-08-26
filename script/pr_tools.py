@@ -66,7 +66,7 @@ def read_loop_detction_result_sc(file_path):
             idx_curr = int(line_info[1])
             idx_best = int(line_info[2])
             score = float(line_info[3])
-            result.append([idx_curr, idx_best, score])
+            result.append([idx_curr, idx_best, score, 0])
     return result
 
 
@@ -85,7 +85,14 @@ def read_loop_detction_result_cont2(file_path):
                 idx_best = int(pairing[1])
             else :
                 idx_best = -1
-            result.append([idx_curr, idx_best, score])
+
+            coordinates = np.array([0, 0, 0])
+            if (len(line_info) >= 6):
+                coordinates[0] = float(line_info[3])
+                coordinates[1] = float(line_info[4])
+                coordinates[2] = float(line_info[5])
+            dist = np.linalg.norm(coordinates)
+            result.append([idx_curr, idx_best, score, dist])
     return result
 
 

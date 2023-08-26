@@ -4,7 +4,7 @@ cd ..
 
 pwd
 
-catkin_make -DPYTHON_EXECUTABLE=/usr/bin/python3 -ltbb
+catkin_make
 
 source devel/setup.bash
 

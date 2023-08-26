@@ -712,26 +712,29 @@ class OSKManager {
     }
   }
 
-  void GetObjectCloud(Cloud& cloud_out, bool output_all = true) {
+  void GetObjectCloud(Cloud& cloud_out) {
     cloud_out.clear();
-    cloud_out.reserve(map_.size());
+    cloud_out.reserve(registration_points_.size());
     pcl::PointXYZI pt;
-    std::hash<int> int_hash;
 
-    if (output_all) {
-      for (auto& point : registration_points_) {
-        pt.x = point.x();
-        pt.y = point.y();
-        pt.z = point.z();
-        cloud_out.push_back(pt);
-      }
-    } else {
-      for (auto& point : object_points_) {
-        pt.x = point.x();
-        pt.y = point.y();
-        pt.z = point.z();
-        cloud_out.push_back(pt);
-      }
+    for (auto& point : registration_points_) {
+      pt.x = point.x();
+      pt.y = point.y();
+      pt.z = point.z();
+      cloud_out.push_back(pt);
+    }
+  }
+
+  void GetObjectLessCloud(Cloud& cloud_out) {
+    cloud_out.clear();
+    cloud_out.reserve(object_points_.size());
+    pcl::PointXYZI pt;
+
+    for (auto& point : object_points_) {
+      pt.x = point.x();
+      pt.y = point.y();
+      pt.z = point.z();
+      cloud_out.push_back(pt);
     }
   }
 
