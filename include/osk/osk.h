@@ -606,13 +606,22 @@ class OSKManager {
     return best_match_id;
   }
 
-  ScanID GetBestOverlapID() {
+  ScanID GetBestOverlapScan() {
     if (candidate_scan_overlap_scores_.empty()) {
       return -1;
     }
 
     const auto& best_match_id = candidate_scan_overlap_scores_.front().first;
     return best_match_id;
+  }
+
+  std::pair<ScanID, ScoreType> GetBestScanID() {
+    if (best_match_scan_id_ == -1) {
+      return std::make_pair(-1, 0);
+    }
+
+    return std::make_pair(best_match_scan_id_,
+                          candidate_logs_[best_match_scan_id_].overlap_score);
   }
 
   ScanID GetBestOverlapMatchPairs(std::vector<Eigen::Vector3f>& points_curr,

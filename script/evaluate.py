@@ -5,15 +5,16 @@ from scipy.spatial import KDTree
 import pr_tools as pr
 
 if __name__ == "__main__":
-    file_gt_sens_poses = "/media/zz/new/myMidImg/kitti_08/out.txt"
+    file_gt_sens_poses = "/media/zz/new/myMidImg/kitti_00/out.txt"
 
-    file_outcome_osk = "/media/zz/new/myMidImg/search_result/kitti_08_4.txt"
-    file_outcome_cont2 = "/media/zz/new/cont2_gen/outcome-kitti08_semantic.txt"
-    file_outcome_sc = "/media/zz/new/myresult/sc-kitti08_semantic.txt"
+    file_outcome_osk = "/media/zz/new/myMidImg/search_result/kitti_00_t.txt"
+    file_outcome_cont2 = "/media/zz/new/cont2_gen/outcome-kitti00_semantic.txt"
+    file_outcome_sc = "/media/zz/new/myresult/sc-kitti00_semantic.txt"
     file_outcome_iris = "/media/zz/new/myMidImg/iris_result/kitti_06.txt"
 
     file_outcome_bow3d = "/media/zz/new/myMidImg/bow3d_results/kitti360_00.txt"
 
+    dataset_name = "kitti_00"
     thres_dist = 15.0
     thres_frame_dist = 150
 
@@ -37,6 +38,6 @@ if __name__ == "__main__":
         "SC"
     ]
 
-    title = "kitti02 threshold = " + str(thres_dist)
+    title = dataset_name + "  th:" + str(thres_dist) + "m"
 
     pr.plot_pr_curves(pr_results, data_names, title)

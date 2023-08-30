@@ -255,8 +255,10 @@ void RunOSKSearch() {
               << " matched frame has " << keypoints_match.size() << " keypoints"
               << std::endl;
 
+    auto best_result = osk_manager.GetBestScanID();
+
     bool detect_loop = false;
-    if (!results.empty() && results.front().second > overlap_threshold) {
+    if (best_result.second > overlap_threshold) {
       detect_loop = true;
     }
 
@@ -316,8 +318,6 @@ void RunOSKSearch() {
     osk_manager.GetObjectCloud(*cloud_object);
     osk_manager.GetGroundCloud(*cloud_ground);
     osk_manager.GetObjectLessCloud(*cloud_object_less);
-    std::cout << "find " << cloud_landmark->size() << " keypoints."
-              << std::endl;
 
     if (scan_num % 20 == 0) {
       osk_manager.ReportParameters();
@@ -347,7 +347,9 @@ void RunOSKSearch() {
     pub_path2.publish(path2);
 
     scan_num += 1;
-    std::cout << "frame " << scan_num << " ds size = " << cloud_ds->size()
+    std::cout << "Frame " << scan_num << " ds size = " << cloud_ds->size()
+              << " landmark: " << cloud_landmark->size() 
+              << " object: " << cloud_object->size()
               << std::endl;
     osk_manager.RecordSearchResult();
 
