@@ -5,10 +5,11 @@ from scipy.interpolate import interp1d
 
 
 def process_kitti360(lidar_folder_path, timestamp_path, calib_cam_to_velo_path, cam0_to_world_path, output_folder_path):
-    timestamp_id_bin_path = output_folder_path + "/ts_bin.txt"
-    timestamp_pose_path = output_folder_path + "/ts_pose.txt"
-    timestamp_id_pose_path = output_folder_path + "/id_pose.txt"
-    output_path = output_folder_path + "/out.txt"
+    sequence_output_path = output_folder_path + "/out.txt"
+    nonsequence_output_path = output_folder_path + "/out2.txt"
+    # for cont2
+    ts_bin_path = output_folder_path + "/ts-lidar_bins.txt"
+    ts_pose_path = output_folder_path + "/ts-sens_pose.txt"
 
     file_pathes = gtt.get_file_pathes_in_folder(lidar_folder_path)
     timestamps = gtt.read_timestamps_kitti360(timestamp_path)
@@ -35,24 +36,24 @@ def process_kitti360(lidar_folder_path, timestamp_path, calib_cam_to_velo_path, 
         frame_info.pose = velo_to_world[:3, :] # Exclude the last row
         frame_infos[frame_index] = frame_info
 
-    gtt.write_frame_infos(frame_infos, output_path)
-    gtt.write_timestamp_pose(frame_infos, timestamp_pose_path)
-    gtt.write_timestamp_id_pose(frame_infos, timestamp_id_pose_path)
-    gtt.write_timestamp_id_bin(frame_infos, timestamp_id_bin_path)
+    gtt.write_sequence_frame_infos(frame_infos, sequence_output_path)
+    gtt.write_frame_infos(frame_infos, nonsequence_output_path)
+    gtt.write_timestamp_pose(frame_infos, ts_pose_path)
+    gtt.write_timestamp_id_bin(frame_infos, ts_bin_path)
 
-    print("Output written to:", output_path)
-    print("ts-pose written to:", timestamp_pose_path)
-    print("ts-id-pose written to:", timestamp_id_pose_path)
-    print("ts-id-bin written to:", timestamp_id_bin_path)
+    print("Sequence Output to:", sequence_output_path)
+    print("Non-Sequence Output written to:", nonsequence_output_path)
+    print("ts-sens_pose written to:", ts_pose_path)
+    print("ts-lidar_bins written to:", ts_bin_path)
 
 
 if __name__ == "__main__":
-    lidar_folder_path = "/media/zz/new/kitti360/KITTI-360/data_3d_raw/2013_05_28_drive_0009_sync/velodyne_points/data"
-    timestamp_path = "/media/zz/new/kitti360/KITTI-360/data_3d_raw/2013_05_28_drive_0009_sync/velodyne_points/timestamps.txt"
+    lidar_folder_path = "/media/zz/new/kitti360/KITTI-360/data_3d_raw/2013_05_28_drive_0006_sync/velodyne_points/data"
+    timestamp_path = "/media/zz/new/kitti360/KITTI-360/data_3d_raw/2013_05_28_drive_0006_sync/velodyne_points/timestamps.txt"
     calib_cam_to_velo_path = "/media/zz/new/kitti360/KITTI-360/calibration/calib_cam_to_velo.txt"
-    cam0_to_world_path = "/media/zz/new/kitti360/KITTI-360/data_poses/2013_05_28_drive_0009_sync/cam0_to_world.txt"
+    cam0_to_world_path = "/media/zz/new/kitti360/KITTI-360/data_poses/2013_05_28_drive_0006_sync/cam0_to_world.txt"
 
-    output_folder_path = "/media/zz/new/myMidImg/kitti360_09"
+    output_folder_path = "/media/zz/new/myMidImg/kitti360_06"
 
     process_kitti360(lidar_folder_path, timestamp_path,
                      calib_cam_to_velo_path, cam0_to_world_path, output_folder_path)

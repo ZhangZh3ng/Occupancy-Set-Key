@@ -6,8 +6,8 @@ from mpl_toolkits.mplot3d import Axes3D
 
 
 class ScanInfo:
-    def __init__(self, frame_id, timestamp=0.0, bin_file_path="", pose=None):
-        self.frame_id = frame_id
+    def __init__(self, scan_id, timestamp=0.0, bin_file_path="", pose=None):
+        self.scan_id = scan_id
         self.timestamp = timestamp
         self.bin_file_path = bin_file_path
         self.pose = pose
@@ -15,7 +15,7 @@ class ScanInfo:
     def __str__(self):
         pose_str = " ".join(
             f"{val:.6f}" for val in self.pose.flatten()) if self.pose is not None else ""
-        return f"{self.frame_id} {self.timestamp:.6e} {pose_str} {self.bin_file_path}"
+        return f"{self.scan_id} {self.timestamp:.6e} {pose_str} {self.bin_file_path}"
 
 #                                timestamp
 
@@ -72,6 +72,7 @@ def read_pose_file_kitti360(file_path):
             poses[frame_index] = matrix
     return poses
 
+
 def read_pose_file_kitti(file_path):
     poses = {}
     frame_index = 0
@@ -83,6 +84,7 @@ def read_pose_file_kitti(file_path):
             poses[frame_index] = matrix
             frame_index += 1
     return poses
+
 
 def read_calibration_file_kitti360(file_path):
     with open(file_path, 'r') as f:
@@ -122,31 +124,47 @@ def write_timestamp_id_bin(timestamps, file_paths, output_file_path):
 
 def write_frame_infos(frame_infos, output_path):
     with open(output_path, "w") as output_file:
-        for frame_id, frame_info in frame_infos.items():
+        for scan_id, frame_info in frame_infos.items():
             output_file.write(str(frame_info) + "\n")
+
+# Some dataset has discontinuous scan, such as KITTI360. In this dataset some stationary scans are discarded, so their scan_id may 'jump'. That cause problem when testing some method such as Scan Context, so we change these 'jumped' id into sequence for convience.
+def write_sequence_frame_infos(frame_infos, output_path):
+    with open(output_path, "w") as output_file:
+        # since we don't care the origin scan_id, always start from 0
+        sequence_id = 0
+        for scan_id, frame_info in frame_infos.items():
+            timestamp = frame_info.timestamp
+            bin_file_path = frame_info.bin_file_path
+            pose_str = " ".join(f"{val:.6f}" for val in frame_info.pose.flatten(
+            )) if frame_info.pose is not None else ""
+            output_file.write(
+                f"{sequence_id} {timestamp:.6e} {pose_str} {bin_file_path}\n")
+            sequence_id += 1
 
 
 def write_timestamp_pose(frame_infos, output_path):
     with open(output_path, "w") as output_file:
-        for frame_id, frame_info in frame_infos.items():
+        for scan_id, frame_info in frame_infos.items():
             timestamp = frame_info.timestamp
             pose_str = " ".join(f"{val:.6f}" for val in frame_info.pose.flatten(
             )) if frame_info.pose is not None else ""
             output_file.write(f"{timestamp:.6e} {pose_str}\n")
 
+
 def write_timestamp_id_pose(frame_infos, output_path):
     with open(output_path, "w") as output_file:
-        for frame_id, frame_info in frame_infos.items():
+        for scan_id, frame_info in frame_infos.items():
             timestamp = frame_info.timestamp
             pose_str = " ".join(f"{val:.6f}" for val in frame_info.pose.flatten(
             )) if frame_info.pose is not None else ""
-            output_file.write(f"{timestamp:.6e} {frame_id} {pose_str}\n")
+            output_file.write(f"{timestamp:.6e} {scan_id} {pose_str}\n")
 
 
 def write_timestamp_id_bin(frame_infos, output_path):
     with open(output_path, "w") as output_file:
-        for frame_id, frame_info in frame_infos.items():
+        sequence_id = 0
+        for scan_id, frame_info in frame_infos.items():
             timestamp = frame_info.timestamp
-            frame_id = frame_info.frame_id
             bin_file_path = frame_info.bin_file_path
-            output_file.write(f"{timestamp:.6e} {frame_id} {bin_file_path}\n")
+            output_file.write(f"{timestamp:.6e} {sequence_id} {bin_file_path}\n")
+            sequence_id += 1
