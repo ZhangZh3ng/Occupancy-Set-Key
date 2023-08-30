@@ -129,7 +129,9 @@ class OSKManager {
              const std::size_t lsh_band_num = 5,
              const double occupancy_context_max_range = 20,
              const double occupancy_context_redius_resolution = 2,
-             const double occupancy_context_angle_resolution = 6)
+             const double occupancy_context_angle_resolution = 6,
+             const double overlap_grid_size = 0.5,
+             const int num_exclude_near_scan = 300)
       : xy_leaf_size_(xy_leaf_size),
         z_leaf_size_(z_leaf_size),
         landmark_range_threshold_(landmark_range_threshold),
@@ -140,6 +142,8 @@ class OSKManager {
         occupancy_context_redius_resolution_(
             occupancy_context_redius_resolution),
         occupancy_context_angle_resolution_(occupancy_context_angle_resolution),
+        overlap_grid_size_(overlap_grid_size),
+        num_exclude_near_scan_(num_exclude_near_scan),
         min_hash_(lsh_band_length_ * lsh_band_num_),
         lidar_pose_(Eigen::Matrix4f::Identity()) {
     landmark_mask_area_ = ID2D::DisntanceInRadius(landmark_mask_radius);

@@ -1,20 +1,23 @@
 <launch> 
-  <param name="lidar_info_path" type="string" value="/media/zz/new/myMidImg/kitti360_00/out.txt" />
-  <param name="result_save_path" type="string" value="/media/zz/new/myMidImg/search_result/kitti360_02.txt" />
+  <param name="lidar_info_path" type="string" value="/media/zz/new/myMidImg/kitti_08/out.txt" />
+  <param name="result_save_path" type="string" value="/media/zz/new/myMidImg/search_result/kitti_08_4.txt" />
 
   <param name="xy_leaf_size" type="double" value="0.5" />
-  <param name="z_leaf_size" type="double" value="0.2" />
+  <param name="z_leaf_size" type="double" value="0.5" />
 
   <param name="landmark_occupancy_threshold" type="int" value="4" />
   <param name="landmark_range_threshold" type="double" value="40" />
   <param name="landmark_mask_radius" type="double" value="3" />
 
-  <param name="lsh_band_length" type="int" value="6" />
+  <param name="lsh_band_length" type="int" value="4" />
   <param name="lsh_band_num" type="int" value="10" />
 
   <param name="occupancy_context_max_range" type="double" value="20" />
   <param name="occupancy_context_redius_resolution" type="double" value="0.5" />
   <param name="occupancy_context_angle_resolution" type="double" value="6" />
+
+  <param name="overlap_grid_size" type="double" value="1" />
+  <param name="num_exclude_near_scan" type="int" value="150" />
 
   <param name="enable_pre_downsample" type="bool" value="false" />
   <param name="overlap_threshold" type="double" value="0.2" />

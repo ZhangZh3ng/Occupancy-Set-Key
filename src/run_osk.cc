@@ -28,6 +28,8 @@ int lsh_band_num;
 double occupancy_context_max_range;
 double occupancy_context_redius_resolution;
 double occupancy_context_angle_resolution;
+double overlap_grid_size;
+int num_exclude_near_scan;
 bool enable_pre_downsample;
 double overlap_threshold;
 std::string result_save_path;
@@ -106,7 +108,9 @@ void RunOSKSearch() {
                          lsh_band_num,
                          occupancy_context_max_range,
                          occupancy_context_redius_resolution,
-                         occupancy_context_angle_resolution};
+                         occupancy_context_angle_resolution,
+                         overlap_grid_size,
+                         num_exclude_near_scan};
 
   Timekeeper timer;
 
@@ -208,12 +212,13 @@ void RunOSKSearch() {
     double t3 = timer.GetLastElapsedTime() / 1000;
 
     timer.Resume();
-    osk_manager.VoteByOSK();
+    auto results = osk_manager.VoteByOSK();
     timer.Pause();
     double t4 = timer.GetLastElapsedTime() / 1000;
 
     timer.Resume();
-    auto results = osk_manager.GeometryCheck();
+    // auto results = osk_manager.GeometryCheck();
+    osk_manager.GeometryCheck();
     timer.Pause();
     double t5 = timer.GetLastElapsedTime() / 1000;
 
@@ -399,6 +404,8 @@ int main(int argc, char** argv) {
                    occupancy_context_redius_resolution, 2);
   nh.param<double>("occupancy_context_angle_resolution",
                    occupancy_context_angle_resolution, 6);
+  nh.param<double>("overlap_grid_size", overlap_grid_size, 0.5);
+  nh.param<int>("num_exclude_near_scan", num_exclude_near_scan, 300);
 
   nh.param<bool>("enable_pre_downsample", enable_pre_downsample, false);
   nh.param<double>("overlap_threshold", overlap_threshold, 0.5);
