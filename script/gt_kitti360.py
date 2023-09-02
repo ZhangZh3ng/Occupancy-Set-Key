@@ -48,12 +48,12 @@ def process_kitti360(lidar_folder_path, timestamp_path, calib_cam_to_velo_path, 
 
 
 if __name__ == "__main__":
-    lidar_folder_path = "/media/zz/new/kitti360/KITTI-360/data_3d_raw/2013_05_28_drive_0006_sync/velodyne_points/data"
-    timestamp_path = "/media/zz/new/kitti360/KITTI-360/data_3d_raw/2013_05_28_drive_0006_sync/velodyne_points/timestamps.txt"
+    lidar_folder_path = "/media/zz/new/kitti360/KITTI-360/data_3d_raw/2013_05_28_drive_0010_sync/velodyne_points/data"
+    timestamp_path = "/media/zz/new/kitti360/KITTI-360/data_3d_raw/2013_05_28_drive_0010_sync/velodyne_points/timestamps.txt"
     calib_cam_to_velo_path = "/media/zz/new/kitti360/KITTI-360/calibration/calib_cam_to_velo.txt"
-    cam0_to_world_path = "/media/zz/new/kitti360/KITTI-360/data_poses/2013_05_28_drive_0006_sync/cam0_to_world.txt"
+    cam0_to_world_path = "/media/zz/new/kitti360/KITTI-360/data_poses/2013_05_28_drive_0010_sync/cam0_to_world.txt"
 
-    output_folder_path = "/media/zz/new/myMidImg/kitti360_06"
+    output_folder_path = "/media/zz/new/myMidImg/kitti360_10"
 
     process_kitti360(lidar_folder_path, timestamp_path,
                      calib_cam_to_velo_path, cam0_to_world_path, output_folder_path)

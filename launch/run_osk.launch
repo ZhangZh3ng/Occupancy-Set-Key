@@ -1,6 +1,6 @@
 <launch> 
-  <param name="lidar_info_path" type="string" value="/media/zz/new/myMidImg/kitti_00/out.txt" />
-  <param name="result_save_path" type="string" value="/media/zz/new/myMidImg/search_result/kitti_00_t.txt" />
+  <param name="lidar_info_path" type="string" value="/media/zz/new/myMidImg/kitti360_04/out.txt" />
+  <param name="result_save_path" type="string" value="/media/zz/new/myMidImg/result_osk/kitti360_04.txt" />
 
   <param name="xy_leaf_size" type="double" value="0.5" />
   <param name="z_leaf_size" type="double" value="0.2" />
@@ -20,7 +20,7 @@
   <param name="num_exclude_near_scan" type="int" value="150" />
 
   <param name="enable_pre_downsample" type="bool" value="false" />
-  <param name="overlap_threshold" type="double" value="0.2" />
+  <param name="overlap_threshold" type="double" value="0.28" />
   <param name="loop_dist_threshold" type="double" value="15" />
   
   <node name="run_osk" pkg="osk" type="run_osk" output="screen" />

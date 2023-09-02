@@ -1,6 +1,11 @@
+# Some of the code comes form contour-context(https://github.com/lewisjiang/contour-context)
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.spatial import KDTree
+from matplotlib.collections import LineCollection
+
+
+# input data formt: [frame_id(0), timestamp(1), pose(2-13)]
 
 
 def get_gt_sens_poses(fpath_gt_sens_poses):
@@ -33,6 +38,8 @@ def get_maxf1_idx(data):
             max_pt = d
     return max_f1, idx
 
+# Note: If algorithm didn't find a loop, we always set idx_best = 0 and score = 0
+
 
 def read_loop_detction_result(file_path):
     result = []
@@ -55,21 +62,6 @@ def read_loop_detction_result(file_path):
     return result
 
 
-def read_loop_detction_result_sc(file_path):
-    result = []
-    with open(file_path, "r") as f1:
-        lines = f1.readlines()
-        for line in lines:
-            line_info = line.strip().split()
-            assert len(line_info) > 3
-
-            idx_curr = int(line_info[1])
-            idx_best = int(line_info[2])
-            score = float(line_info[3])
-            result.append([idx_curr, idx_best, score, 0])
-    return result
-
-
 def read_loop_detction_result_cont2(file_path):
     result = []
     with open(file_path, "r") as f1:
@@ -83,7 +75,7 @@ def read_loop_detction_result_cont2(file_path):
             score = eval(line_info[2])
             if pairing[1] != 'x':
                 idx_best = int(pairing[1])
-            else :
+            else:
                 idx_best = -1
 
             coordinates = np.array([0, 0, 0])
@@ -178,21 +170,17 @@ def comput_pr_points_ts(fp_gt_sens_poses, outcome, thres_dist=10, thres_time=30)
     return plots_data
 
 
+# Note: this function only work on sequence scan id, and the first scan id must be 0 that is consistent with our xxx.out.txt format
 def comput_pr_points(fp_gt_sens_poses, outcome, thres_dist=10, thres_frame_dist=300):
     plots_data = []
     pr_points = []
 
-    # the sensor poses must be ordered by time/creation/acquisition
     gt_pose, frame_ids, timestamps = get_gt_sens_poses(fp_gt_sens_poses)
 
     # gt_positive indicate if this scan has a positive loop pair
     gt_positive = np.zeros(gt_pose.shape[0])
     gt_points = gt_pose[:, [3, 7, 11]]
     tree = KDTree(gt_points)
-
-    id_map = {}
-    for index, element in enumerate(frame_ids):
-        id_map[element] = index
 
     for i in range(gt_pose.shape[0]):
         near_points = tree.query_ball_point(gt_points[i, :], thres_dist)
@@ -203,10 +191,6 @@ def comput_pr_points(fp_gt_sens_poses, outcome, thres_dist=10, thres_frame_dist=
 
     est = []
     for idx_curr, idx_best, score, dist in outcome:
-        idx_curr = id_map[idx_curr]
-        if idx_best != -1:
-            idx_best = id_map[idx_best]
-
         # [score, if_find_tp, is_positive , id_curr, id_match]
         est_line = [score, 0, 0, idx_curr, int(-1)]
 
@@ -260,102 +244,60 @@ def comput_pr_points(fp_gt_sens_poses, outcome, thres_dist=10, thres_frame_dist=
     return plots_data
 
 
-
-def get_pr_points(fp_gt_sens_poses, fp_outcome, thres_dist):
-    plots_data = []
-
-    print(fp_gt_sens_poses)
-    print(fp_outcome)
-    pr_points = []
-
-    # the sensor poses must be ordered by time/creation/acquisition
+# Note: this function only work on sequence scan id, and the first scan id must be 0 that is consistent with our xxx.out.txt format
+def comput_maxf1_result(fp_gt_sens_poses, outcome, maxf1_score, thres_dist=10, thres_frame_dist=300):
+    result = []
     gt_pose, frame_ids, timestamps = get_gt_sens_poses(fp_gt_sens_poses)
+
     # gt_positive indicate if this scan has a positive loop pair
     gt_positive = np.zeros(gt_pose.shape[0])
     gt_points = gt_pose[:, [3, 7, 11]]
     tree = KDTree(gt_points)
 
-    print(frame_ids)
-    id_map = {}
-    for index, element in enumerate(frame_ids):
-        print(index, element)
-        id_map[element] = index
-
     for i in range(gt_pose.shape[0]):
         near_points = tree.query_ball_point(gt_points[i, :], thres_dist)
         for j in near_points:
-            if timestamps[j] < timestamps[i] - 30:
+            if j < i - thres_frame_dist:
                 gt_positive[i] = 1
                 break
 
-    with open(fp_outcome, "r") as f1:
-        lines = f1.readlines()
-        est = []
-        for line in lines:
-            line_info = line.strip().split()
-            assert len(line_info) > 3
+    for idx_curr, idx_best, score, dist in outcome:
+        judgement_is_positive = True
+        if score < maxf1_score:
+            judgement_is_positive = False
 
-            idx_curr = int(line_info[0])
-            idx_best = int(line_info[1])
-            idx_curr = id_map[idx_curr]
-            if idx_best != -1:
-                idx_best = id_map[idx_best]
-            score = float(line_info[2])
+        find_true_loop = True
+        if np.linalg.norm(gt_pose[idx_curr].reshape(3, 4)[:, 3] -
+                          gt_pose[idx_best].reshape(3, 4)[:, 3]) > thres_dist:
+            find_true_loop = False
 
-            # [score, if_find_tp, is_positive , id_curr, id_match]
-            est_line = [score, 0, 0, idx_curr, int(-1)]
+        has_true_loop = gt_positive[idx_curr]
+        gt_point = gt_points[idx_curr]
 
-            if np.linalg.norm(gt_pose[idx_curr].reshape(3, 4)[:, 3] -
-                              gt_pose[idx_best].reshape(3, 4)[:, 3]) < thres_dist:
-                est_line[1] = 1
-
-            # 3. if the overall is P
-            est_line[2] = gt_positive[idx_curr]
-            est_line[4] = idx_best
-
-            est.append(est_line)
-
-        est = np.vstack(est)
-        est = est[(-est[:, 0]).argsort()]  # sort by correlation, larger better
-
-        tp = 0
-        fp = 0
-        for i in range(est.shape[0]):
-            if est[i, 1]:
-                tp += 1
+        # True Positive: 0    has true loop, and find correct true loop
+        # False Positive: 1   find a loop, but it is not true loop
+        # True Negative: 2    no true loop, and report no loop
+        # False Negative: 3   has true loop, but not find it
+        type = 2
+        if has_true_loop:
+            if judgement_is_positive and find_true_loop:
+                # has TP and find it
+                type = 0
             else:
-                fp += 1
+                # has TP but not find
+                type = 3
+        else:
+            if judgement_is_positive:
+                # no TP but report one positive
+                type = 1
 
-            fn = 0
-            for j in range(i, est.shape[0]):
-                if est[j, 2]:
-                    fn += 1
+        this_result = [gt_point[0], gt_point[1], gt_point[2], type]
+        result.append(this_result)
 
-            pr_points.append([tp / (tp + fn), tp / (tp + fp), est[i, 3]])
-
-        # print(pr_points)
-        points = np.vstack(pr_points)[:, 0:2]
-        points = points[points[:, 0].argsort()]
-        plots_data.append(points)
-
-        # get max F1
-        max_f1, f1_pose_idx = get_maxf1_idx(pr_points)
-        print("Max F1 score: %f @%d " % (max_f1, int(f1_pose_idx)))
-
-        # calc rmse for scores above max f1 sim
-        sim_thres = eval(lines[int(f1_pose_idx)].split()[2])
-        print("sim thres for Max F1 score: %f" % sim_thres)
-
-        num_scan_has_lc = 0
-        for i in gt_positive:
-            if i == 1:
-                num_scan_has_lc += 1
-        print('total %d scans has positive loop pair' % num_scan_has_lc)
-
-    return plots_data
+    return result
 
 
-def get_pr_points_and_max_f1_loops(fp_gt_sens_poses, fp_outcome, thres_dist):
+def get_pr_points_and_max_f1_loops(fp_gt_sens_poses, fp_outcome, thres_dist, thres_frame_dist=300):
     pr_data = []
 
     print(fp_gt_sens_poses)
@@ -372,7 +314,7 @@ def get_pr_points_and_max_f1_loops(fp_gt_sens_poses, fp_outcome, thres_dist):
     for i in range(gt_pose.shape[0]):
         near_points = tree.query_ball_point(gt_points[i, :], thres_dist)
         for j in near_points:
-            if j < i - 300:  # block nearest 300 scans.
+            if j < i - thres_frame_dist:  # block nearest scans.
                 gt_positive[i] = 1
                 break
 
@@ -503,8 +445,8 @@ def plot_trajectory_with_loop_mark(gt_poses, detected_loops, thres_dist):
     plt.show()
 
 
-def plot_pr_curves(pr_datas, curve_names, image_title="outcome"):
-    fig, axes = plt.subplots(1, 1, figsize=(18, 6))
+def plot_pr_curves(pr_datas, curve_names, image_title="outcome", use_legend=True):
+    fig, axes = plt.subplots(1, 1, figsize=(12, 9))
 
     assert len(pr_datas) == len(curve_names)
 
@@ -531,6 +473,109 @@ def plot_pr_curves(pr_datas, curve_names, image_title="outcome"):
             used_names.append(curve_names[j])
             used_colors.append("C%d" % (9 - j))
 
-        ax.legend(used_names, loc=3)
+        if use_legend :
+            ax.legend(used_names, loc=3)
+
+    return fig
+
+
+def visualize_pr_trajectory(trajectory, title="", use_legend=True, use_grid=True):
+    # Extract line segments and colors for LineCollection
+    lines = []
+    colors = []
+
+    for i in range(len(trajectory) - 1):
+        line_points = np.array([[trajectory[i][0], trajectory[i][1]], [
+                               trajectory[i + 1][0], trajectory[i + 1][1]]])
+        lines.append(line_points)
+        colors.extend([trajectory[i][3]])
+
+    # Define color map for the conditions
+    condition_colors = {
+        0: 'g',  # True Positive: Green
+        1: 'r',  # False Positive: Red
+        2: 'b',  # True Negative: Blue
+        3: 'y'   # False Negative: Yellow
+    }
+
+    # Create a LineCollection
+    line_segments = LineCollection(
+        lines, colors=[condition_colors[color] for color in colors], linewidths=2)
+
+    # Create a scatter plot for the endpoints (optional)
+    endpoints_x = np.array([line[-1][0] for line in lines])
+    endpoints_y = np.array([line[-1][1] for line in lines])
+    plt.scatter(endpoints_x, endpoints_y, color=[
+                condition_colors[color] for color in colors], s=10, alpha=0.8, linewidths=0.1)
+
+    # Customize plot appearance
+    plt.xlabel('X Coordinate (m)')
+    plt.ylabel('Y Coordinate (m)')
+    plt.title(title)
+    plt.grid(use_grid)
+
+    # Create legend for condition colors
+    legend_labels = {
+        0: 'True Positive',
+        1: 'False Positive',
+        2: 'True Negative',
+        3: 'False Negative'
+    }
+    handles = [plt.Line2D([], [], marker='o', color='w',
+                          markerfacecolor=condition_colors[i], label=legend_labels[i]) for i in range(4)]
+    if (use_legend) :
+        plt.legend(handles=handles, title='Conditions', loc='upper left')
+
+    # Add LineCollection to the plot
+    plt.gca().add_collection(line_segments)
+
+    # Show plot
+    plt.show()
+
+
+def visualize_pr_trajectory_3d(trajectory, z_rate=0.1, use_legend=True):
+    x_coords = []
+    y_coords = []
+    z_coords = []
+    conditions = []
+    id = 0
+    for line in trajectory:
+        x_coords.append(line[0])
+        y_coords.append(line[1])
+        # Compute z coordinate based on rate and id (row index)
+        z_coords.append(z_rate * id)  
+        conditions.append(line[3])
+        id += 1
+
+    condition_colors = {
+        0: 'g',  # True Positive: Green
+        1: 'r',  # False Positive: Red
+        2: 'b',  # True Negative: Blue
+        3: 'y'   # False Negative: Yellow
+    }
+
+    fig = plt.figure(figsize=(10, 8))
+    ax = fig.add_subplot(111, projection='3d')
+    
+    # Plot the trajectory as a colored line
+    for i in range(len(x_coords) - 1):
+        ax.plot(x_coords[i:i+2], y_coords[i:i+2], z_coords[i:i+2], color=condition_colors[conditions[i]], linewidth=2)
+
+    ax.set_xlabel('X Coordinate (m)')
+    ax.set_ylabel('Y Coordinate (m)')
+    ax.set_zlabel('Timestamp (s)')
+    ax.set_title('3D Trajectory Plot with Colored Path')
+
+    # Create legend for condition colors
+    legend_labels = {
+        0: 'True Positive',
+        1: 'False Positive',
+        2: 'True Negative',
+        3: 'False Negative'
+    }
+    handles = [plt.Line2D([], [], color=condition_colors[i], label=legend_labels[i]) for i in range(4)]
+
+    if (use_legend) :
+        plt.legend(handles=handles, title='Conditions', loc='upper left')
 
     plt.show()

@@ -340,7 +340,7 @@ Visualization Manager:
     - Alpha: 1
       Buffer Length: 1
       Class: rviz/Path
-      Color: 32; 74; 135
+      Color: 206; 92; 0
       Enabled: false
       Head Diameter: 0.30000001192092896
       Head Length: 0.20000000298023224
@@ -370,13 +370,13 @@ Visualization Manager:
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
-      Enabled: false
+      Enabled: true
       Marker Topic: /loop_markers_fp
       Name: loop_marker_fp
       Namespaces:
-        {}
+        loop_closures: true
       Queue Size: 100
-      Value: false
+      Value: true
     - Alpha: 1
       Class: rviz/Axes
       Enabled: true
@@ -414,7 +414,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 385.6989440917969
+      Distance: 1544.0535888671875
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -422,17 +422,17 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: 80.04351043701172
-        Y: 116.74384307861328
-        Z: -89.40352630615234
+        X: 3427.225830078125
+        Y: -1053.9627685546875
+        Z: -506.2908630371094
       Focal Shape Fixed Size: false
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.3397961854934692
+      Pitch: 0.6997970938682556
       Target Frame: <Fixed Frame>
-      Yaw: 3.1835806369781494
+      Yaw: 5.186758518218994
     Saved: ~
 Window Geometry:
   Displays:

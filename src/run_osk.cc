@@ -122,7 +122,6 @@ void RunOSKSearch() {
 
   tf::TransformBroadcaster broadcaster_this, broadcaster_match;
 
-  ros::Rate r(2);
   int scan_num = 0;
   while (ros::ok()) {
     while (!is_running) {

@@ -24,12 +24,14 @@ catkin_package(
 find_package(PCL REQUIRED)
 find_package(TBB REQUIRED)
 find_package(Eigen3 REQUIRED)
+find_package(OpenCV REQUIRED)
 
 include_directories(
   include
 	${catkin_INCLUDE_DIRS} 
   ${EIGEN3_INCLUDE_DIR}
 	${PCL_INCLUDE_DIRS}
+  ${OpenCV_INCLUDE_DIRS}
 )
 
 add_executable(run_osk src/run_osk.cc)

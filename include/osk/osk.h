@@ -1,7 +1,7 @@
 /*
   Author: Zheng Zhang
   Created: 2023-6-2
-  Description: A point cloud based place recognition algrithm.
+  Description: A point cloud based place recognition algorithm.
 */
 
 #pragma once
