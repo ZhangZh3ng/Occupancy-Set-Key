@@ -53,9 +53,9 @@ if __name__ == "__main__":
     # =============================== KITTI Odometry ====================================
     lidar_folder_path = "/media/zz/new/kitti_odometry/data_odometry_velodyne/dataset/sequences/06/velodyne"
     timestamp_path = "/media/zz/new/kitti_odometry/data_odometry_calib/dataset/sequences/06/times.txt"
-    calib_cam_to_velo_path = "/media/zz/new/kitti_odometry/data_odometry_calib/dataset/sequences/06/calib.txt"
-    cam0_to_world_path = "/media/zz/new/kitti_odometry/data_odometry_labels/dataset/sequences/06/poses.txt"
+    calib_path = "/media/zz/new/kitti_odometry/data_odometry_calib/dataset/sequences/06/calib.txt"
+    pose_path = "/media/zz/new/kitti_odometry/data_odometry_labels/dataset/sequences/06/poses.txt"
 
     output_folder_path = "/media/zz/new/myMidImg/kitti_06"
 
-    gen_kitti(lidar_folder_path, timestamp_path, calib_cam_to_velo_path, cam0_to_world_path, output_folder_path)
+    gen_kitti(lidar_folder_path, timestamp_path, calib_path, pose_path, output_folder_path)

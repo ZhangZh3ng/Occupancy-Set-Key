@@ -4,7 +4,7 @@
 
 We use point cloud download from [Semantic KITTI](http://www.semantic-kitti.org/dataset.html)
 
-**Download Data**: [LiDAR](http://www.cvlibs.net/download.php?file=data_odometry_velodyne.zip), [calib&time](http://www.cvlibs.net/download.php?file=data_odometry_calib.zip), [pose](https://s3.eu-central-1.amazonaws.com/avg-kitti/data_odometry_poses.zip)
+**Download Data**: [LiDAR](http://www.cvlibs.net/download.php?file=data_odometry_velodyne.zip), [calib&time](http://www.cvlibs.net/download.php?file=data_odometry_calib.zip), [pose](http://www.semantic-kitti.org/assets/data_odometry_labels.zip)
 
 1. In **script/gt_kitti.py**, set four path:`lidar_folder_path`(lidar .bin file's folder), `timestamp_path`, `calib_cam_to_velo_path`, `cam0_to_world_path` according to the dataset's path on your computer. Then create a folder and assign its path to `output_folder_path`. 
 

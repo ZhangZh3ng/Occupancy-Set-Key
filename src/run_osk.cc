@@ -33,6 +33,8 @@ int num_exclude_near_scan;
 bool enable_pre_downsample;
 double overlap_threshold;
 std::string result_save_path;
+std::string time_save_path;
+std::string descriptor_save_folder;
 
 double loop_dist_threshold;
 
@@ -122,6 +124,32 @@ void RunOSKSearch() {
 
   tf::TransformBroadcaster broadcaster_this, broadcaster_match;
 
+  std::vector<std::vector<double>> time_costs;
+
+  auto pub_messages = [&]() {
+    PublishCloud(*cloud_this, pub_cloud_this, header);
+    PublishCloud(*cloud_object, pub_object, header);
+    PublishCloud(*cloud_landmark, pub_landmark, header);
+    PublishCloud(*cloud_ground, pub_ground, header);
+    PublishCloud(*cloud_object_less, pub_object_less, header);
+
+    // match
+    PublishCloud(*cloud_match_raw, pub_cloud_match, header_world);
+    PublishCloud(*cloud_match_origin, pub_cloud_match_origin, header);
+    PublishCloud(*cloud_match_transform, pub_cloud_match_transform, header);
+    PublishCloud(*cloud_match_origin_add, pub_cloud_match_origin_add, header);
+
+    pub_link_marker.publish(link_marker);
+    pub_loop.publish(loop_marker);
+    pub_loop_fp.publish(loop_marker_fp);
+    pub_path.publish(path);
+    pub_path2.publish(path2);
+
+    PublishTF(broadcaster_this,
+              reader.GetCurrentScanInfo().transformation.cast<float>(), "world",
+              "lidar");
+  };
+
   int scan_num = 0;
   while (ros::ok()) {
     while (!is_running) {
@@ -162,8 +190,8 @@ void RunOSKSearch() {
     path2.header = path.header;
 
     int curr_scan_id = reader.GetCurrentScanInfo().scan_id;
-    std::string des_path =
-        fp_des + std::to_string(reader.GetCurrentScanInfo().scan_id) + ".txt";
+    // std::string des_path =
+    //     fp_des + std::to_string(reader.GetCurrentScanInfo().scan_id) + ".txt";
 
     pcl::VoxelGrid<pcl::PointXYZI> filter;
     filter.setLeafSize(0.4, 0.4, 0.4);
@@ -231,6 +259,10 @@ void RunOSKSearch() {
               << " this total = " << (t1 + t2 + t3 + t4 + t5 + t6)
               << " total avg = " << timer.GetOverallTime() / 1000 / scan_num
               << std::endl;
+    
+    // cost_format: [scan_id, t1, t2+t3, t4+t5, t6]
+    std::vector<double> cost{double(scan_num), t1, (t2+t3), (t4+t5), t6};
+    time_costs.emplace_back(cost);
 
     // result process
     if (!results.empty()) {
@@ -352,6 +384,13 @@ void RunOSKSearch() {
               << std::endl;
     osk_manager.RecordSearchResult();
 
+    // write descriptor
+    std::string des_path = descriptor_save_folder + "/" +
+                           std::to_string(reader.GetCurrentScanInfo().scan_id) +
+                           ".txt";
+    std::cout << des_path << std::endl;
+    osk_manager.WriteDescriptor(des_path);
+
     // go to next scan
     if (!reader.TryMoveToNextScan()) {
       std::cout << "all scan has been processed, exit." << std::endl;
@@ -359,6 +398,16 @@ void RunOSKSearch() {
     }
   }
   osk_manager.WriteSearchResult(result_save_path);
+  // write time cost
+  std::ofstream file(time_save_path);
+    for (auto& entry : time_costs) {
+      for (auto& val : entry) {
+        file << val << " ";
+      }
+      file << std::endl;
+    }
+  file.close();
+
   std::cout << "write ok." << std::endl;
 
   while (ros::ok()) {
@@ -412,6 +461,9 @@ int main(int argc, char** argv) {
   nh.param<double>("overlap_threshold", overlap_threshold, 0.5);
   nh.param<std::string>("result_save_path", result_save_path, "");
   nh.param<double>("loop_dist_threshold", loop_dist_threshold, 10);
+
+  nh.param<std::string>("time_save_path", time_save_path, "");
+  nh.param<std::string>("descriptor_save_folder", descriptor_save_folder, "");
 
   pub_cloud_this = nh.advertise<sensor_msgs::PointCloud2>("cloud_this", 10);
   pub_ground = nh.advertise<sensor_msgs::PointCloud2>("ground", 100);

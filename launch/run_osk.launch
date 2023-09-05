@@ -1,11 +1,13 @@
 <launch> 
-  <param name="lidar_info_path" type="string" value="/media/zz/new/myMidImg/kitti360_04/out.txt" />
-  <param name="result_save_path" type="string" value="/media/zz/new/myMidImg/result_osk/kitti360_04.txt" />
+  <param name="lidar_info_path" type="string" value="/media/zz/new/myMidImg/kitti_00/out.txt" />
+  <param name="result_save_path" type="string" value="/media/zz/new/myMidImg/result_osk/kitti_00_t.txt" />
+  <param name="time_save_path" type="string" value="/media/zz/new/myMidImg/result_osk/time.txt" />
+  <param name="descriptor_save_folder" type="string" value="/media/zz/new/myMidImg/result_osk/des" />
 
   <param name="xy_leaf_size" type="double" value="0.5" />
   <param name="z_leaf_size" type="double" value="0.2" />
 
-  <param name="landmark_occupancy_threshold" type="int" value="4" />
+  <param name="landmark_occupancy_threshold" type="int" value="5" />
   <param name="landmark_range_threshold" type="double" value="40" />
   <param name="landmark_mask_radius" type="double" value="4" />
 

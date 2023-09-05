@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.spatial import KDTree
 from matplotlib.collections import LineCollection
+from scipy.spatial.distance import cdist
 
 
 # input data formt: [frame_id(0), timestamp(1), pose(2-13)]
@@ -483,6 +484,7 @@ def visualize_pr_trajectory(trajectory, title="", use_legend=True, use_grid=True
     # Extract line segments and colors for LineCollection
     lines = []
     colors = []
+    fig = plt.figure(figsize=(12, 9))
 
     for i in range(len(trajectory) - 1):
         line_points = np.array([[trajectory[i][0], trajectory[i][1]], [
@@ -494,7 +496,7 @@ def visualize_pr_trajectory(trajectory, title="", use_legend=True, use_grid=True
     condition_colors = {
         0: 'g',  # True Positive: Green
         1: 'r',  # False Positive: Red
-        2: 'b',  # True Negative: Blue
+        2: 'gray',  # True Negative: Blue
         3: 'y'   # False Negative: Yellow
     }
 
@@ -506,7 +508,7 @@ def visualize_pr_trajectory(trajectory, title="", use_legend=True, use_grid=True
     endpoints_x = np.array([line[-1][0] for line in lines])
     endpoints_y = np.array([line[-1][1] for line in lines])
     plt.scatter(endpoints_x, endpoints_y, color=[
-                condition_colors[color] for color in colors], s=10, alpha=0.8, linewidths=0.1)
+                condition_colors[color] for color in colors], s=10, alpha=1, linewidths=0.1)
 
     # Customize plot appearance
     plt.xlabel('X Coordinate (m)')
@@ -530,7 +532,8 @@ def visualize_pr_trajectory(trajectory, title="", use_legend=True, use_grid=True
     plt.gca().add_collection(line_segments)
 
     # Show plot
-    plt.show()
+    # plt.show()
+    return fig
 
 
 def visualize_pr_trajectory_3d(trajectory, z_rate=0.1, use_legend=True):
@@ -579,3 +582,22 @@ def visualize_pr_trajectory_3d(trajectory, z_rate=0.1, use_legend=True):
         plt.legend(handles=handles, title='Conditions', loc='upper left')
 
     plt.show()
+
+
+def find_nearest_distances(gt_points, thres_frame_dist = 150):
+    # Initialize arrays to store the nearest distances and their corresponding indices
+    nearest_distances = np.full(len(gt_points), -1.0)
+    nearest_indices = np.full(len(gt_points), -1)
+
+    for i in range(thres_frame_dist, len(gt_points)):
+        # Calculate distances between point i and all previous points
+        distances = cdist([gt_points[i]], gt_points[:i])
+
+        # Find the minimum distance and its corresponding index
+        min_distance_idx = np.argmin(distances)
+
+        # Store the minimum distance and its index
+        nearest_distances[i] = distances[0, min_distance_idx]
+        nearest_indices[i] = min_distance_idx
+
+    return nearest_distances, nearest_indices

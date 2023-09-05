@@ -5,20 +5,20 @@ from scipy.spatial import KDTree
 import pr_tools as pr
 
 if __name__ == "__main__":
-    file_gt_sens_poses = "/media/zz/new/myMidImg/kitti_00/out.txt"
+    file_gt_sens_poses = "/media/zz/new/myMidImg/kitti360_09/out.txt"
 
-    file_outcome_osk = "/media/zz/new/myMidImg/result_osk/kitti_00.txt"
-    file_outcome_sc = "/media/zz/new/myMidImg/result_sc/kitti_00.txt"
-    file_outcome_iris = "/media/zz/new/myMidImg/result_iris/kitti_00.txt"
-    file_outcome_cont2 = "/media/zz/new/myMidImg/result_cont2/kitti_00.txt"
+    file_outcome_osk = "/media/zz/new/myMidImg/result_osk/kitti360_09.txt"
+    file_outcome_sc = "/media/zz/new/myMidImg/result_sc/kitti360_09.txt"
+    file_outcome_iris = "/media/zz/new/myMidImg/result_iris/kitti360_09.txt"
+    file_outcome_cont2 = "/media/zz/new/myMidImg/result_cont2/kitti360_09.txt"
 
     fig_save_folder = "/home/zz/桌面/fig"
 
-    file_outcome_std = "/media/zz/new/myMidImg/result_std/kitti_00.txt"
-    file_outcome_bow3d = "/media/zz/new/myMidImg/result_bow3d/kitti360_00.txt"
+    # file_outcome_std = "/media/zz/new/myMidImg/result_std/kitti_00.txt"
+    # file_outcome_bow3d = "/media/zz/new/myMidImg/result_bow3d/kitti360_00.txt"
 
-    dataset_name = "kitti_02"
-    thres_dist = 10.0
+    dataset_name = "kitti360_09"
+    thres_dist = 15.0
     thres_frame_dist = 150
 
     fig_name = dataset_name + "_" + str(int(thres_dist))

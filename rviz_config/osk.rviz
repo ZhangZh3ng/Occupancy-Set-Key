@@ -5,6 +5,7 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /Global Options1
+        - /landmark1
       Splitter Ratio: 0.6499999761581421
     Tree Height: 670
   - Class: rviz/Selection
@@ -24,7 +25,7 @@ Panels:
   - Class: rviz/Time
     Name: Time
     SyncMode: 0
-    SyncSource: object_less
+    SyncSource: landmark
 Preferences:
   PromptSaveOnExit: true
 Toolbars:
@@ -92,7 +93,7 @@ Visualization Manager:
       Color: 114; 159; 207
       Color Transformer: FlatColor
       Decay Time: 0
-      Enabled: false
+      Enabled: true
       Invert Rainbow: false
       Max Color: 255; 255; 255
       Min Color: 0; 0; 0
@@ -107,7 +108,7 @@ Visualization Manager:
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
-      Value: false
+      Value: true
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
@@ -120,7 +121,7 @@ Visualization Manager:
       Color: 252; 175; 62
       Color Transformer: FlatColor
       Decay Time: 0
-      Enabled: false
+      Enabled: true
       Invert Rainbow: false
       Max Color: 255; 255; 255
       Min Color: 0; 0; 0
@@ -135,7 +136,7 @@ Visualization Manager:
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
-      Value: false
+      Value: true
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
@@ -148,7 +149,7 @@ Visualization Manager:
       Color: 114; 159; 207
       Color Transformer: FlatColor
       Decay Time: 0
-      Enabled: true
+      Enabled: false
       Invert Rainbow: false
       Max Color: 255; 255; 255
       Min Color: 0; 0; 0
@@ -163,7 +164,7 @@ Visualization Manager:
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
-      Value: true
+      Value: false
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
@@ -184,9 +185,9 @@ Visualization Manager:
       Position Transformer: XYZ
       Queue Size: 10
       Selectable: false
-      Size (Pixels): 5
-      Size (m): 0.6000000238418579
-      Style: Boxes
+      Size (Pixels): 10
+      Size (m): 1
+      Style: Spheres
       Topic: /landmark
       Unreliable: false
       Use Fixed Frame: true
@@ -321,8 +322,8 @@ Visualization Manager:
       Head Diameter: 0.30000001192092896
       Head Length: 0.20000000298023224
       Length: 0.30000001192092896
-      Line Style: Lines
-      Line Width: 0.029999999329447746
+      Line Style: Billboards
+      Line Width: 1
       Name: Path
       Offset:
         X: 0
@@ -362,21 +363,21 @@ Visualization Manager:
       Unreliable: false
       Value: false
     - Class: rviz/MarkerArray
-      Enabled: true
+      Enabled: false
       Marker Topic: /loop_markers
       Name: loop_marker
       Namespaces:
-        loop_closures: true
+        {}
       Queue Size: 100
-      Value: true
+      Value: false
     - Class: rviz/MarkerArray
-      Enabled: true
+      Enabled: false
       Marker Topic: /loop_markers_fp
       Name: loop_marker_fp
       Namespaces:
-        loop_closures: true
+        {}
       Queue Size: 100
-      Value: true
+      Value: false
     - Alpha: 1
       Class: rviz/Axes
       Enabled: true
@@ -414,7 +415,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 1544.0535888671875
+      Distance: 194.31411743164062
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -422,17 +423,17 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: 3427.225830078125
-        Y: -1053.9627685546875
-        Z: -506.2908630371094
+        X: 219.09141540527344
+        Y: 52.10976028442383
+        Z: 0.27394673228263855
       Focal Shape Fixed Size: false
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.6997970938682556
+      Pitch: 1.5697963237762451
       Target Frame: <Fixed Frame>
-      Yaw: 5.186758518218994
+      Yaw: 3.1903769969940186
     Saved: ~
 Window Geometry:
   Displays:
