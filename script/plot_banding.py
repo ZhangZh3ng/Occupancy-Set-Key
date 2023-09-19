@@ -6,14 +6,14 @@ def banding_lsh_probability(s, l, b):
 
 # Parameters for the curves
 params = [
-    {"l": 4, "b": 10},
+    {"l": 2, "b": 10},
     {"l": 6, "b": 10},
-    {"l": 6, "b": 20},
-    {"l": 10, "b": 20},
-    {"l": 20, "b": 20},
-    {"l": 20, "b": 40},
-    {"l": 10, "b": 40},
-    {"l": 10, "b": 100},
+    {"l": 6, "b": 30},
+    # {"l": 10, "b": 20},
+    # {"l": 20, "b": 20},
+    # {"l": 20, "b": 40},
+    # {"l": 10, "b": 40},
+    # {"l": 10, "b": 100},
 ]
 
 # Generate a range of similarity scores
@@ -28,11 +28,12 @@ for param in params:
     
     probabilities = [banding_lsh_probability(s, l, b) for s in scores]
     label = "l=" +str(l) +", b=" + str(b)
-    plt.plot(scores, probabilities, label=label)
+    plt.plot(scores, probabilities, label=label, linewidth=4)
 
 # plt.title("Probability of sharing at least 1 same hash value")
-plt.xlabel("Jaccard similarity")
-plt.ylabel("Probability")
+plt.xlabel("Jaccard similarity", fontsize=16)
+plt.ylabel("Probability", fontsize=16)
+plt.tick_params(axis='both', which='major', labelsize=18)
 # plt.grid()
-plt.legend()
+plt.legend(fontsize=16)
 plt.show()

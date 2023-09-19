@@ -137,7 +137,7 @@ visualization_msgs::Marker GenerateLoopMarker(
   loop_marker.action = visualization_msgs::Marker::ADD;
 
   // Set the scale of the line (e.g., line width)
-  loop_marker.scale.x = 0.1;  // Line width
+  loop_marker.scale.x = 0.3;  // Line width
 
   // Set the color (RGBA) of the marker (green in this example)
   loop_marker.color.r = rgba[0];
@@ -181,7 +181,8 @@ void GeneratePointCorrelationMarkers(
     const std::vector<Eigen::Vector3f>& points1,
     const std::vector<Eigen::Vector3f>& points2,
     visualization_msgs::MarkerArray& markers,
-    const std::string frame_id) {
+    const std::string frame_id,
+    const Eigen::Vector4f rgba = Eigen::Vector4f{0, 1, 0, 1}) {
   markers.markers.clear();
   // Set up markerArray for points and lines
   visualization_msgs::Marker point_marker;
@@ -192,8 +193,8 @@ void GeneratePointCorrelationMarkers(
   point_marker.pose.orientation.w = 1.0;
   point_marker.id = 0;
   point_marker.type = visualization_msgs::Marker::POINTS;
-  point_marker.scale.x = 0.05;
-  point_marker.scale.y = 0.05;
+  point_marker.scale.x = 0.5;
+  point_marker.scale.y = 0.5;
   point_marker.color.r = 1.0;
   point_marker.color.a = 1.0;
 
@@ -205,9 +206,11 @@ void GeneratePointCorrelationMarkers(
   line_marker.pose.orientation.w = 1.0;
   line_marker.id = 1;
   line_marker.type = visualization_msgs::Marker::LINE_LIST;
-  line_marker.scale.x = 0.3;
-  line_marker.color.g = 1.0;
-  line_marker.color.a = 1.0;
+  line_marker.scale.x = 0.6;
+  line_marker.color.r = rgba[0];
+  line_marker.color.g = rgba[1];
+  line_marker.color.b = rgba[2];
+  line_marker.color.a = rgba[3];
 
   // Add points and lines to markerArray
   for (int i = 0; i < points1.size(); i++) {

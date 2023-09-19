@@ -54,7 +54,7 @@ ros::Publisher pub_cloud_match_transform;
 ros::Publisher pub_path2;
 ros::Publisher pub_loop_fp;
 
-std::atomic<bool> is_running{true};
+std::atomic<bool> is_running{false};
 void PauseControl() {
   while (ros::ok()) {
     char input;
@@ -116,7 +116,7 @@ void RunOSKSearch() {
 
   Timekeeper timer;
 
-  Eigen::Vector3f t_add = Eigen::Vector3f{0, 0, 10};
+  Eigen::Vector3f t_add = Eigen::Vector3f{0, 0, 30};
   nav_msgs::Path path, path2;
   path.header.frame_id = "world";
   path2.header.frame_id = "world";
@@ -326,7 +326,7 @@ void RunOSKSearch() {
                                T_match_add);
 
       GeneratePointCorrelationMarkers(landmark_this, landmark_match,
-                                      link_marker, "lidar");
+                                      link_marker, "lidar", Eigen::Vector4f{0, 0, 1, 1});
 
       // make node match higher for visualization.
       bool is_tp = (T_match_to_world.block<3, 1>(0, 3) -
@@ -389,7 +389,7 @@ void RunOSKSearch() {
                            std::to_string(reader.GetCurrentScanInfo().scan_id) +
                            ".txt";
     std::cout << des_path << std::endl;
-    osk_manager.WriteDescriptor(des_path);
+    // osk_manager.WriteDescriptor(des_path);
 
     // go to next scan
     if (!reader.TryMoveToNextScan()) {

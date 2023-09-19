@@ -2,7 +2,6 @@ import os
 import re
 import numpy as np
 from datetime import datetime, timedelta
-# from mpl_toolkits.mplot3d import Axes3D
 
 
 class ScanInfo:
@@ -93,13 +92,22 @@ def read_calibration_file_kitti360(file_path):
     return calib_matrix
 
 
-def get_invers_transform(calib_cam_to_velo):
-    rotation = calib_cam_to_velo[:, :3]
-    translation = calib_cam_to_velo[:, 3]
-    velo_to_cam = np.hstack(
+# convert 12-dimension vector to 4x4 transformation matrix
+def vector_to_transform(vector):
+    if len(vector) != 12:
+        raise ValueError("Input vector must be of length 12.")
+    upper3x4 = np.array(vector).reshape(3, 4)
+    T = np.vstack((upper3x4, [0, 0, 0, 1]))
+    return T
+
+
+def get_invers_transform(T):
+    rotation = T[0:3, 0:3]
+    translation = T[0:3, 3]
+    T_inv = np.hstack(
         (rotation.T, -np.dot(rotation.T, translation.reshape(-1, 1))))
-    velo_to_cam = np.vstack((velo_to_cam, [0, 0, 0, 1]))
-    return velo_to_cam
+    T_inv = np.vstack((T_inv, [0, 0, 0, 1]))
+    return T_inv
 
 
 def interpolate_pose(pose1, pose2, t1, t2, t):

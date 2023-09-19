@@ -845,13 +845,12 @@ class OSKManager {
     file.close();
   }
 
-  void WriteDescriptor(const std::string curr_path, const std::string match_path) {
+  void WriteDescriptor(const std::string curr_path) {
     if (candidate_scan_vote_scores_.empty()) {
       return;
     }
     std::ofstream file(curr_path);
-    
-
+  
     int curr_id;
     const auto& best_match_id = candidate_scan_vote_scores_.front().first;
     const auto& matched_pairs = historical_scan_correspondences_[best_match_id];

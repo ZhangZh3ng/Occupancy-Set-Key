@@ -26,6 +26,20 @@ def get_gt_sens_poses(fpath_gt_sens_poses):
     return np.vstack(pose), frame_ids, timestamps
 
 
+def get_gt_sens_pose_dictionary(fpath_gt_sens_poses):
+    with open(fpath_gt_sens_poses, "r") as fp:
+        lines = fp.readlines()
+
+    poses = {}
+    for line in lines:
+        assert len(line.strip().split()) >= 14
+        elements = line.strip().split()
+        frame_id = eval(elements[0])
+        poses[frame_id] = [eval(x) for x in elements[2:14]]
+
+    return poses
+
+
 def get_maxf1_idx(data):
     max_f1 = 0
     idx = -1
@@ -454,8 +468,10 @@ def plot_pr_curves(pr_datas, curve_names, image_title="outcome", use_legend=True
     for i in range(1):
         ax = axes
 
-        ax.set_xlabel('Recall')
-        ax.set_ylabel('Precision')
+        # ax.set_xlabel('Recall')
+        # ax.set_ylabel('Precision')
+        # plt.xlabel('X Label', fontsize=14)  # Adjust the fontsize as needed
+        # plt.ylabel('Y Label', fontsize=14)  # Adjust the fontsize as needed
 
         ax.set_xlim([0, 1.02])
         ax.set_ylim([0, 1.02])
@@ -463,6 +479,7 @@ def plot_pr_curves(pr_datas, curve_names, image_title="outcome", use_legend=True
         ax.set_title(image_title)
         ax.tick_params(axis="y", direction="in")
         ax.tick_params(axis="x", direction="in")
+        ax.tick_params(axis='both', which='major', labelsize=18)
 
         used_names = []
         used_colors = []
@@ -508,11 +525,11 @@ def visualize_pr_trajectory(trajectory, title="", use_legend=True, use_grid=True
     endpoints_x = np.array([line[-1][0] for line in lines])
     endpoints_y = np.array([line[-1][1] for line in lines])
     plt.scatter(endpoints_x, endpoints_y, color=[
-                condition_colors[color] for color in colors], s=10, alpha=1, linewidths=0.1)
+                condition_colors[color] for color in colors], s=30, alpha=1, linewidths=0.8)
 
     # Customize plot appearance
-    plt.xlabel('X Coordinate (m)')
-    plt.ylabel('Y Coordinate (m)')
+    # plt.xlabel('X Coordinate (m)')
+    # plt.ylabel('Y Coordinate (m)')
     plt.title(title)
     plt.grid(use_grid)
 
@@ -523,10 +540,16 @@ def visualize_pr_trajectory(trajectory, title="", use_legend=True, use_grid=True
         2: 'True Negative',
         3: 'False Negative'
     }
-    handles = [plt.Line2D([], [], marker='o', color='w',
+    legend_labels = {
+        0: 'TP',
+        1: 'FP',
+        2: 'TN',
+        3: 'FN'
+    }
+    handles = [plt.Line2D([], [], marker='o', color='w', markersize=10,
                           markerfacecolor=condition_colors[i], label=legend_labels[i]) for i in range(4)]
     if (use_legend) :
-        plt.legend(handles=handles, title='Conditions', loc='upper left')
+        plt.legend(handles=handles, loc='upper left', fontsize=16)
 
     # Add LineCollection to the plot
     plt.gca().add_collection(line_segments)
@@ -601,3 +624,29 @@ def find_nearest_distances(gt_points, thres_frame_dist = 150):
         nearest_indices[i] = min_distance_idx
 
     return nearest_distances, nearest_indices
+
+    
+def find_true_positive_outcome(fp_gt_sens_poses, result_path, thres_dist=10, thres_score=0):
+    outcome_tp = []
+
+    gt_pose, frame_ids, timestamps = get_gt_sens_poses(fp_gt_sens_poses)
+
+    with open(result_path, "r") as f1:
+        lines = f1.readlines()
+        for line in lines:
+            line_info = line.strip().split()
+            assert len(line_info) >= 3
+
+            idx_curr = int(line_info[0])
+            idx_best = int(line_info[1])
+            score = float(line_info[2])
+            pose_strings = line_info[3:15]
+            # Convert pose_strings to float numbers
+            pose = [float(elem) for elem in pose_strings]
+
+            # true positive condition
+            if np.linalg.norm(gt_pose[idx_curr].reshape(3, 4)[:, 3] -
+                              gt_pose[idx_best].reshape(3, 4)[:, 3]) < thres_dist and (score > thres_score):
+                outcome_tp.append([idx_curr, idx_best, pose])
+
+    return outcome_tp

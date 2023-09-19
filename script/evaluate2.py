@@ -56,7 +56,7 @@ if __name__ == "__main__":
 
         # title = dataset_name + "  th:" + str(thres_dist) + "m"
 
-        fig = pr.plot_pr_curves(pr_results, data_names, image_title="")
+        fig = pr.plot_pr_curves(pr_results, data_names, image_title="",use_legend=False)
 
         fig.savefig(fig_path)
         
