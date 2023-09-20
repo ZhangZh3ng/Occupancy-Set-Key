@@ -11,6 +11,7 @@
 #include <ros/ros.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <visualization_msgs/MarkerArray.h>
+#include <pcl/kdtree/kdtree_flann.h>
 
 #include "osk/data_reader.h"
 #include "osk/kitti.h"
@@ -53,6 +54,9 @@ ros::Publisher pub_cloud_match_origin_add;
 ros::Publisher pub_cloud_match_transform;
 ros::Publisher pub_path2;
 ros::Publisher pub_loop_fp;
+ros::Publisher pub_tp_points;
+ros::Publisher pub_fp_points;
+ros::Publisher pub_fn_points;
 
 std::atomic<bool> is_running{false};
 void PauseControl() {
@@ -125,6 +129,14 @@ void RunOSKSearch() {
   tf::TransformBroadcaster broadcaster_this, broadcaster_match;
 
   std::vector<std::vector<double>> time_costs;
+
+  pcl::PointCloud<pcl::PointXYZI>::Ptr position_cloud{
+      new pcl::PointCloud<pcl::PointXYZI>};
+  pcl::KdTreeFLANN<pcl::PointXYZI> position_kdtree;
+
+  pcl::PointCloud<pcl::PointXYZ> tp_points;
+  pcl::PointCloud<pcl::PointXYZ> fp_points;
+  pcl::PointCloud<pcl::PointXYZ> fn_points;
 
   auto pub_messages = [&]() {
     PublishCloud(*cloud_this, pub_cloud_this, header);
@@ -300,6 +312,37 @@ void RunOSKSearch() {
     marker.id = 0;
     marker.action = visualization_msgs::Marker::DELETEALL;  // Clear old markers
     link_marker.markers.push_back(marker);
+
+    pcl::PointXYZ position_curr{T_this_to_world(0, 3), T_this_to_world(1, 3),
+                                T_this_to_world(2, 3)};
+    bool has_true_loop = false;
+    pcl::PointXYZI position_id;
+    position_id.x = T_this_to_world(0, 3);
+    position_id.y = T_this_to_world(1, 3);
+    position_id.z = T_this_to_world(2, 3);
+    position_id.intensity = curr_scan_id;  // use intensity field store scan_id
+    // update 
+    position_cloud->push_back(position_id);
+    if (scan_num % 20 == 0) {
+      position_kdtree.setInputCloud(position_cloud);
+    }
+    std::vector<int> point_indices;
+    std::vector<float> point_distances;
+    if (position_kdtree.radiusSearch(position_id, loop_dist_threshold,
+                                     point_indices, point_distances)) {
+      const auto& cloud = position_kdtree.getInputCloud();
+      for (size_t i = 0; i < point_indices.size(); ++i) {
+        int point_index = point_indices[i];
+
+        // Access the nearby point and its distance
+        auto nearby_position_scan_id = cloud->points[point_index].intensity;
+        if (curr_scan_id - nearby_position_scan_id > num_exclude_near_scan) {
+          has_true_loop = true;
+          break;
+        }
+      }
+    }
+
     if (detect_loop) {
       ReadLidarFromKittiBin(reader.GetScanInfo(best_id).file_path,
                             *cloud_match_raw);
@@ -334,14 +377,16 @@ void RunOSKSearch() {
                        .norm() < loop_dist_threshold;
       auto T_this_to_world_add = T_this_to_world;
       T_this_to_world_add.block<3, 1>(0, 3) += t_add;
+
+
       if (is_tp) {
-        loop_marker.markers.push_back(GenerateLoopMarker(
-            T_this_to_world_add, T_match_to_world, "world", scan_num));
+        tp_points.emplace_back(position_curr);
       } else {
-        loop_marker_fp.markers.push_back(
-            GenerateLoopMarker(T_this_to_world_add, T_match_to_world, "world",
-                               scan_num, Eigen::Vector4f{1, 0, 0, 1}));
+        fp_points.emplace_back(position_curr);
       }
+    }
+    if (has_true_loop && !detect_loop) {
+      fn_points.emplace_back(position_curr);
     }
 
     osk_manager.GetDownsampledCloud(*cloud_ds);
@@ -376,6 +421,11 @@ void RunOSKSearch() {
     pub_loop_fp.publish(loop_marker_fp);
     pub_path.publish(path);
     pub_path2.publish(path2);
+
+    // marker:
+    PublishCloud(tp_points, pub_tp_points, header_world);
+    PublishCloud(fp_points, pub_fp_points, header_world);
+    PublishCloud(fn_points, pub_fn_points, header_world);
 
     scan_num += 1;
     std::cout << "Frame " << scan_num << " ds size = " << cloud_ds->size()
@@ -487,6 +537,10 @@ int main(int argc, char** argv) {
       nh.advertise<sensor_msgs::PointCloud2>("match_transform", 100);
   pub_cloud_match_origin_add =
       nh.advertise<sensor_msgs::PointCloud2>("match_origin_add", 100);
+
+  pub_tp_points = nh.advertise<sensor_msgs::PointCloud2>("tp_points", 100);
+  pub_fp_points = nh.advertise<sensor_msgs::PointCloud2>("fp_points", 100);
+  pub_fn_points = nh.advertise<sensor_msgs::PointCloud2>("fn_points", 100);
 
   std::thread thread_pause_control(PauseControl);
 

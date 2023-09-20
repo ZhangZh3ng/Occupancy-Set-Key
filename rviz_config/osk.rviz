@@ -5,8 +5,6 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /Global Options1
-        - /lidar_frame1
-        - /world_frame1/Path21
       Splitter Ratio: 0.6499999761581421
     Tree Height: 670
   - Class: rviz/Selection
@@ -187,8 +185,8 @@ Visualization Manager:
       Queue Size: 10
       Selectable: false
       Size (Pixels): 10
-      Size (m): 1.5
-      Style: Spheres
+      Size (m): 0.6000000238418579
+      Style: Boxes
       Topic: /landmark
       Unreliable: false
       Use Fixed Frame: true
@@ -307,17 +305,17 @@ Visualization Manager:
       Use rainbow: true
       Value: true
     - Class: rviz/MarkerArray
-      Enabled: true
+      Enabled: false
       Marker Topic: /line_markers
       Name: line_marker
       Namespaces:
         {}
       Queue Size: 100
-      Value: true
+      Value: false
     - Alpha: 1
       Buffer Length: 1
       Class: rviz/Path
-      Color: 32; 74; 135
+      Color: 211; 215; 207
       Enabled: true
       Head Diameter: 0.30000001192092896
       Head Length: 0.20000000298023224
@@ -362,80 +360,104 @@ Visualization Manager:
       Topic: /path2
       Unreliable: false
       Value: false
-    - Class: rviz/MarkerArray
-      Enabled: false
-      Marker Topic: /loop_markers
-      Name: loop_marker
-      Namespaces:
-        {}
-      Queue Size: 100
-      Value: false
-    - Class: rviz/MarkerArray
-      Enabled: false
-      Marker Topic: /loop_markers_fp
-      Name: loop_marker_fp
-      Namespaces:
-        {}
-      Queue Size: 100
-      Value: false
     - Alpha: 1
       Class: rviz/Axes
-      Enabled: true
+      Enabled: false
       Length: 6
       Name: lidar_frame
       Radius: 0.5
       Reference Frame: lidar
       Show Trail: false
-      Value: true
-    - Class: rviz/Group
-      Displays:
-        - Class: rviz/MarkerArray
-          Enabled: true
-          Marker Topic: /loop_markers_fp
-          Name: loop_marker_fp
-          Namespaces:
-            {}
-          Queue Size: 100
-          Value: true
-        - Class: rviz/MarkerArray
-          Enabled: true
-          Marker Topic: /loop_markers
-          Name: loop_marker
-          Namespaces:
-            {}
-          Queue Size: 100
-          Value: true
-        - Alpha: 1
-          Buffer Length: 1
-          Class: rviz/Path
-          Color: 186; 189; 182
-          Enabled: true
-          Head Diameter: 0.30000001192092896
-          Head Length: 0.20000000298023224
-          Length: 0.30000001192092896
-          Line Style: Billboards
-          Line Width: 1
-          Name: Path2
-          Offset:
-            X: 0
-            Y: 0
-            Z: 0
-          Pose Color: 255; 85; 255
-          Pose Style: None
-          Queue Size: 10
-          Radius: 0.029999999329447746
-          Shaft Diameter: 0.10000000149011612
-          Shaft Length: 0.10000000149011612
-          Topic: /path2
-          Unreliable: false
-          Value: true
+      Value: false
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz/PointCloud2
+      Color: 115; 210; 22
+      Color Transformer: FlatColor
+      Decay Time: 0
       Enabled: true
-      Name: world_frame
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Min Color: 0; 0; 0
+      Name: true positive
+      Position Transformer: XYZ
+      Queue Size: 10
+      Selectable: true
+      Size (Pixels): 10
+      Size (m): 0.009999999776482582
+      Style: Points
+      Topic: /tp_points
+      Unreliable: false
+      Use Fixed Frame: true
+      Use rainbow: true
+      Value: true
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz/PointCloud2
+      Color: 204; 0; 0
+      Color Transformer: FlatColor
+      Decay Time: 0
+      Enabled: true
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Min Color: 0; 0; 0
+      Name: false positive
+      Position Transformer: XYZ
+      Queue Size: 10
+      Selectable: true
+      Size (Pixels): 10
+      Size (m): 0.009999999776482582
+      Style: Points
+      Topic: /fp_points
+      Unreliable: false
+      Use Fixed Frame: true
+      Use rainbow: true
+      Value: true
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz/PointCloud2
+      Color: 193; 125; 17
+      Color Transformer: FlatColor
+      Decay Time: 0
+      Enabled: true
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Min Color: 0; 0; 0
+      Name: false negative
+      Position Transformer: XYZ
+      Queue Size: 10
+      Selectable: true
+      Size (Pixels): 10
+      Size (m): 0.009999999776482582
+      Style: Points
+      Topic: /fn_points
+      Unreliable: false
+      Use Fixed Frame: true
+      Use rainbow: true
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 255; 255; 255
     Default Light: true
-    Fixed Frame: world
+    Fixed Frame: lidar
     Frame Rate: 30
   Name: root
   Tools:
@@ -459,7 +481,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 676.5534057617188
+      Distance: 559.6323852539062
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -467,17 +489,17 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: 323.1384582519531
-        Y: -49.1680793762207
-        Z: -239.25637817382812
+        X: 86.28693389892578
+        Y: -10.80793285369873
+        Z: -37.22757339477539
       Focal Shape Fixed Size: false
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.9853983521461487
+      Pitch: 1.5697963237762451
       Target Frame: <Fixed Frame>
-      Yaw: 2.5154170989990234
+      Yaw: 3.1835906505584717
     Saved: ~
 Window Geometry:
   Displays:

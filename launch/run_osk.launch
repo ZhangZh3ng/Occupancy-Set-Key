@@ -1,5 +1,5 @@
 <launch> 
-  <param name="lidar_info_path" type="string" value="/media/zz/new/myMidImg/kitti360_09/out.txt" />
+  <param name="lidar_info_path" type="string" value="/media/zz/new/myMidImg/kitti_00/out.txt" />
   <param name="result_save_path" type="string" value="/media/zz/new/myMidImg/result_osk/kitti_00_t.txt" />
   <param name="time_save_path" type="string" value="/media/zz/new/myMidImg/result_osk/time_kitti_08.txt" />
   <param name="descriptor_save_folder" type="string" value="/media/zz/new/myMidImg/result_osk/des" />

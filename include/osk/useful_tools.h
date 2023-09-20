@@ -370,3 +370,36 @@ void AddPointCorrelationMarkers(const std::vector<Eigen::Vector3f>& points1,
   markers.markers.push_back(point_marker);
   markers.markers.push_back(line_marker);
 }
+
+visualization_msgs::Marker GeneratePointMarkers(
+    const std::vector<Eigen::Vector3f>& points,
+    const std::string& frame_id,
+    const std::vector<float>& rgba,
+    float size) {
+  visualization_msgs::Marker marker;
+  marker.header.frame_id = frame_id;
+  marker.header.stamp = ros::Time::now();
+  marker.ns = "point_markers";
+  marker.id = 0;
+  marker.type = visualization_msgs::Marker::POINTS;
+  marker.action = visualization_msgs::Marker::ADD;
+  marker.scale.x = size;  // Point size
+
+  // Set marker color (RGBA)
+  marker.color.r = rgba[0];
+  marker.color.g = rgba[1];
+  marker.color.b = rgba[2];
+  marker.color.a = rgba[3];
+
+  // Add the provided points to the marker
+  marker.points.resize(points.size());
+  for (size_t i = 0; i < points.size(); ++i) {
+    geometry_msgs::Point point;
+    point.x = points[i](0);
+    point.y = points[i](1);
+    point.z = points[i](2);
+    marker.points[i] = point;
+  }
+
+  return marker;
+}
