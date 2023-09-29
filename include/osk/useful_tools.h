@@ -206,7 +206,7 @@ void GeneratePointCorrelationMarkers(
   line_marker.pose.orientation.w = 1.0;
   line_marker.id = 1;
   line_marker.type = visualization_msgs::Marker::LINE_LIST;
-  line_marker.scale.x = 0.6;
+  line_marker.scale.x = 0.4;
   line_marker.color.r = rgba[0];
   line_marker.color.g = rgba[1];
   line_marker.color.b = rgba[2];

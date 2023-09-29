@@ -58,7 +58,7 @@ ros::Publisher pub_tp_points;
 ros::Publisher pub_fp_points;
 ros::Publisher pub_fn_points;
 
-std::atomic<bool> is_running{false};
+std::atomic<bool> is_running{true};
 void PauseControl() {
   while (ros::ok()) {
     char input;
@@ -120,7 +120,7 @@ void RunOSKSearch() {
 
   Timekeeper timer;
 
-  Eigen::Vector3f t_add = Eigen::Vector3f{0, 0, 30};
+  Eigen::Vector3f t_add = Eigen::Vector3f{0, 0, 15};
   nav_msgs::Path path, path2;
   path.header.frame_id = "world";
   path2.header.frame_id = "world";
@@ -200,6 +200,9 @@ void RunOSKSearch() {
     path2.poses.emplace_back();
     path2.poses.back().pose.position = point2;
     path2.header = path.header;
+
+    pub_path.publish(path);
+    pub_path2.publish(path2);
 
     int curr_scan_id = reader.GetCurrentScanInfo().scan_id;
     // std::string des_path =
@@ -399,6 +402,12 @@ void RunOSKSearch() {
       osk_manager.ReportParameters();
     }
 
+    // marker:
+    PublishCloud(tp_points, pub_tp_points, header_world);
+    PublishCloud(fp_points, pub_fp_points, header_world);
+    PublishCloud(fn_points, pub_fn_points, header_world);
+    std::this_thread::sleep_for(std::chrono::milliseconds(3));
+
     // current
     PublishCloud(*cloud_this, pub_cloud_this, header);
     PublishCloud(*cloud_object, pub_object, header);
@@ -419,13 +428,6 @@ void RunOSKSearch() {
     pub_link_marker.publish(link_marker);
     pub_loop.publish(loop_marker);
     pub_loop_fp.publish(loop_marker_fp);
-    pub_path.publish(path);
-    pub_path2.publish(path2);
-
-    // marker:
-    PublishCloud(tp_points, pub_tp_points, header_world);
-    PublishCloud(fp_points, pub_fp_points, header_world);
-    PublishCloud(fn_points, pub_fn_points, header_world);
 
     scan_num += 1;
     std::cout << "Frame " << scan_num << " ds size = " << cloud_ds->size()
@@ -461,6 +463,18 @@ void RunOSKSearch() {
   std::cout << "write ok." << std::endl;
 
   while (ros::ok()) {
+    link_marker.markers.clear();
+    visualization_msgs::Marker marker;
+    marker.header.frame_id = "lidar";
+    marker.ns = "link";
+    marker.id = 0;
+    marker.action = visualization_msgs::Marker::DELETEALL;  // Clear old markers
+    link_marker.markers.push_back(marker);
+
+    cloud_this->clear();
+    cloud_object->clear();
+    cloud_landmark->clear();
+
     // current
     PublishCloud(*cloud_this, pub_cloud_this, header);
     PublishCloud(*cloud_object, pub_object, header);

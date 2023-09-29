@@ -22,7 +22,7 @@
   <param name="num_exclude_near_scan" type="int" value="150" />
 
   <param name="enable_pre_downsample" type="bool" value="false" />
-  <param name="overlap_threshold" type="double" value="0.28" />
+  <param name="overlap_threshold" type="double" value="0.285511" />
   <param name="loop_dist_threshold" type="double" value="15" />
   
   <node name="rviz" pkg="rviz" type="rviz" output="screen"  args="-d $(find osk)/rviz_config/osk.rviz" />
