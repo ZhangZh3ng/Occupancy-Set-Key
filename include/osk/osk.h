@@ -90,6 +90,7 @@ class OSKManager {
   struct HistoricalScan {
     std::vector<Eigen::Vector3f> landmarks;
     std::vector<Eigen::Vector3f> registration_points;
+    std::vector<std::vector<ID3D>> occupancy_sets;
   };
 
   struct QueryItem {
@@ -584,6 +585,13 @@ class OSKManager {
       curr_scan_info.landmarks.emplace_back(keypoint.point);
     }
     curr_scan_info.registration_points = registration_points_;
+    for (auto& landmark : landmarks_) {
+      std::vector<ID3D> occupancy_set;
+      for (auto& id : landmark.occupied_ids) {
+        occupancy_set.emplace_back(id);
+      }
+      curr_scan_info.occupancy_sets.push_back(occupancy_set);
+    }
   }
 
   ScanID GetBestVoteMatchPairs(std::vector<Eigen::Vector3f>& points_curr,
@@ -863,6 +871,32 @@ class OSKManager {
       file << id.x() << " " << id.y() << "\n";
     }
     file.close();
+  }
+
+  void WriteDescriptor2(const std::string curr_path, const std::string match_path ) {
+    if (candidate_scan_vote_scores_.empty()) {
+      return;
+    }
+    
+    int curr_landmark_id;
+    int match_landmark_id;
+    const auto& best_match_id = candidate_scan_vote_scores_.front().first;
+    const auto& matched_pairs = historical_scan_correspondences_[best_match_id];
+    curr_landmark_id = matched_pairs.front().curr_point_id;
+    match_landmark_id = matched_pairs.front().match_point_id;
+
+    std::ofstream file(curr_path);
+    auto& landmark = landmarks_[curr_landmark_id];
+    for (auto& id : landmark.occupied_ids) {
+      file << id.x() << " " << id.y() << "\n";
+    }
+    file.close();
+
+    std::ofstream file2(match_path);
+    for (auto& id : historical_scans_[best_match_id]->occupancy_sets[match_landmark_id]) {
+      file2 << id.x() << " " << id.y() << "\n";
+    }
+    file2.close();
   }
 
  private:

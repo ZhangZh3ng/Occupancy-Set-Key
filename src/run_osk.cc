@@ -435,11 +435,13 @@ void RunOSKSearch() {
     osk_manager.RecordSearchResult();
 
     // write descriptor
-    std::string des_path = descriptor_save_folder + "/" +
+    std::string des_path1 = descriptor_save_folder + "/" +
                            std::to_string(reader.GetCurrentScanInfo().scan_id) +
-                           ".txt";
-    std::cout << des_path << std::endl;
-    // osk_manager.WriteDescriptor(des_path);
+                           "_curr.txt";
+    std::string des_path2 = descriptor_save_folder + "/" +
+                           std::to_string(reader.GetCurrentScanInfo().scan_id) +
+                           "_match.txt";
+    osk_manager.WriteDescriptor2(des_path1, des_path2);
 
     // go to next scan
     if (!reader.TryMoveToNextScan()) {
