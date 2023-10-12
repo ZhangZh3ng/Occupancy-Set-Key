@@ -14,6 +14,8 @@
 #include <utility>
 #include <vector>
 
+#include "osk/hash_combine.h"
+
 class RandomPermutationHash {
  public:
   RandomPermutationHash(const std::size_t i, std::size_t prime = 999999999989)
