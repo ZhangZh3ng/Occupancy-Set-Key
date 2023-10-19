@@ -53,6 +53,30 @@ def get_maxf1_idx(data):
             max_pt = d
     return max_f1, idx
 
+
+# AUC
+def compute_pr_auc(precision, recall):
+    """
+    Compute the Area Under the Precision-Recall Curve (AUC-PR).
+
+    Args:
+        precision (list): List of precision values.
+        recall (list): List of recall values.
+
+    Returns:
+        float: AUC-PR value.
+    """
+    if len(precision) != len(recall):
+        raise ValueError("Precision and recall lists must have the same length.")
+
+    auc_pr = 0.0
+    n = len(precision)
+
+    for i in range(1, n):
+        auc_pr += abs(recall[i] - recall[i - 1]) * precision[i]
+
+    return auc_pr
+
 # Note: If algorithm didn't find a loop, we always set idx_best = 0 and score = 0
 
 
@@ -241,6 +265,14 @@ def comput_pr_points(fp_gt_sens_poses, outcome, thres_dist=10, thres_frame_dist=
     points = np.vstack(pr_points)[:, 0:2]
     points = points[points[:, 0].argsort()]
     plots_data.append(points)
+
+    precision = []
+    recall = []
+    for line in pr_points :
+        precision.append(line[1])
+        recall.append(line[0])
+    auc = compute_pr_auc(precision, recall)
+    print("AUC: %f" % auc)
 
     # get max F1
     max_f1, f1_pose_idx = get_maxf1_idx(pr_points)
@@ -502,6 +534,7 @@ def visualize_pr_trajectory(trajectory, title="", use_legend=True, use_grid=True
     lines = []
     colors = []
     fig = plt.figure(figsize=(12, 9))
+    fig.patch.set_facecolor('none')  # Set the background color to transparent
 
     for i in range(len(trajectory) - 1):
         line_points = np.array([[trajectory[i][0], trajectory[i][1]], [

@@ -40,3 +40,10 @@ target_link_libraries(run_osk
     ${PCL_LIBRARIES}
     ${catkin_LIBRARIES}
     )
+
+add_executable(analyze_pose src/analyze_pose.cc)
+target_link_libraries(analyze_pose
+        TBB::tbb
+        ${PCL_LIBRARIES}
+        ${catkin_LIBRARIES}
+        )

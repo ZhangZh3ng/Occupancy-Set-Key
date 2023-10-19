@@ -1,0 +1,12 @@
+<launch> 
+  <param name="lidar_info_path" type="string" value="/media/zz/new/myMidImg/kitti_08/out.txt" />
+  <param name="result_save_path" type="string" value="/media/zz/new/myMidImg/result_osk/kitti_08.txt" />
+
+  <param name="overlap_threshold" type="double" value="0.28" />
+  <param name="loop_dist_threshold" type="double" value="15" />
+  
+  <!-- <node name="rviz" pkg="rviz" type="rviz" output="screen"  args="-d $(find osk)/rviz_config/osk.rviz" /> -->
+
+  <!-- Start analyze_pose -->
+  <node name="analyze_pose" pkg="osk" type="analyze_pose" output="screen"  />
+</launch>
