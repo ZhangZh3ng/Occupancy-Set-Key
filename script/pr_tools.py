@@ -292,6 +292,85 @@ def comput_pr_points(fp_gt_sens_poses, outcome, thres_dist=10, thres_frame_dist=
 
 
 # Note: this function only work on sequence scan id, and the first scan id must be 0 that is consistent with our xxx.out.txt format
+def comput_auc_maxf1(fp_gt_sens_poses, outcome, thres_dist=10, thres_frame_dist=300, flag_print_midinfo=False):
+    plots_data = []
+    pr_points = []
+
+    gt_pose, frame_ids, timestamps = get_gt_sens_poses(fp_gt_sens_poses)
+
+    # gt_positive indicate if this scan has a positive loop pair
+    gt_positive = np.zeros(gt_pose.shape[0])
+    gt_points = gt_pose[:, [3, 7, 11]]
+    tree = KDTree(gt_points)
+
+    for i in range(gt_pose.shape[0]):
+        near_points = tree.query_ball_point(gt_points[i, :], thres_dist)
+        for j in near_points:
+            if j < i - thres_frame_dist:
+                gt_positive[i] = 1
+                break
+
+    est = []
+    for idx_curr, idx_best, score, dist in outcome:
+        # [score, if_find_tp, is_positive , id_curr, id_match]
+        est_line = [score, 0, 0, idx_curr, int(-1)]
+
+        if np.linalg.norm(gt_pose[idx_curr].reshape(3, 4)[:, 3] -
+                          gt_pose[idx_best].reshape(3, 4)[:, 3]) < thres_dist:
+            est_line[1] = 1
+
+        # 3. if the overall is P
+        if dist < thres_dist:
+            est_line[2] = gt_positive[idx_curr]
+            est_line[4] = idx_best
+
+        est.append(est_line)
+
+    est = np.vstack(est)
+    est = est[(-est[:, 0]).argsort()]  # sort by correlation, larger better
+
+    tp = 0
+    fp = 0
+    for i in range(est.shape[0]):
+        if est[i, 1]:
+            tp += 1
+        else:
+            fp += 1
+
+        fn = 0
+        for j in range(i, est.shape[0]):
+            if est[j, 2]:
+                fn += 1
+
+        pr_points.append([tp / (tp + fn), tp / (tp + fp), est[i, 3]])
+
+    points = np.vstack(pr_points)[:, 0:2]
+    points = points[points[:, 0].argsort()]
+    plots_data.append(points)
+
+    precision = []
+    recall = []
+    for line in pr_points :
+        precision.append(line[1])
+        recall.append(line[0])
+    auc = compute_pr_auc(precision, recall)
+    if flag_print_midinfo:
+        print("AUC: %f" % auc)
+
+    # get max F1
+    max_f1, f1_pose_idx = get_maxf1_idx(pr_points)
+    if flag_print_midinfo:
+        print("Max F1 score: %f @%d " % (max_f1, int(f1_pose_idx)))
+
+    # calc rmse for scores above max f1 sim
+    if flag_print_midinfo :
+        sim_thres = (outcome[int(f1_pose_idx)][2])
+        print("sim thres for Max F1 score: %f" % sim_thres)
+
+    return auc, max_f1
+
+
+# Note: this function only work on sequence scan id, and the first scan id must be 0 that is consistent with our xxx.out.txt format
 def comput_maxf1_result(fp_gt_sens_poses, outcome, maxf1_score, thres_dist=10, thres_frame_dist=300):
     result = []
     gt_pose, frame_ids, timestamps = get_gt_sens_poses(fp_gt_sens_poses)
@@ -492,7 +571,7 @@ def plot_trajectory_with_loop_mark(gt_poses, detected_loops, thres_dist):
     plt.show()
 
 
-def plot_pr_curves(pr_datas, curve_names, image_title="outcome", use_legend=True):
+def plot_pr_curves(pr_datas, curve_names, image_title="outcome", use_legend=True, use_label_mark=False):
     fig, axes = plt.subplots(1, 1, figsize=(12, 9))
 
     assert len(pr_datas) == len(curve_names)
@@ -500,8 +579,9 @@ def plot_pr_curves(pr_datas, curve_names, image_title="outcome", use_legend=True
     for i in range(1):
         ax = axes
 
-        # ax.set_xlabel('Recall')
-        # ax.set_ylabel('Precision')
+        if use_label_mark: 
+            ax.set_xlabel('Recall', fontsize=16)
+            ax.set_ylabel('Precision', fontsize=16)
         # plt.xlabel('X Label', fontsize=14)  # Adjust the fontsize as needed
         # plt.ylabel('Y Label', fontsize=14)  # Adjust the fontsize as needed
 
@@ -676,6 +756,9 @@ def find_true_positive_outcome(fp_gt_sens_poses, result_path, thres_dist=10, thr
             pose_strings = line_info[3:15]
             # Convert pose_strings to float numbers
             pose = [float(elem) for elem in pose_strings]
+
+            if (idx_best == -1) :
+                continue
 
             # true positive condition
             if np.linalg.norm(gt_pose[idx_curr].reshape(3, 4)[:, 3] -

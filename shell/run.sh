@@ -8,4 +8,4 @@ catkin_make
 
 source devel/setup.bash
 
-roslaunch osk analyze_pose.launch
+roslaunch osk run_osk.launch

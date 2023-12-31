@@ -21,8 +21,6 @@ def extract_rpy_translation(matrix):
     
     return roll, pitch, yaw, translation_vector
 
-import numpy as np
-import math
 
 names = ["kitti_00", "kitti_02", "kitti_05", "kitti_08", "kitti360_00", "kitti360_04", "kitti360_05", "kitti360_06", "kitti360_09"]
 
@@ -33,7 +31,7 @@ with open(result_path, "w") as results_file:
         file_gt_sens_poses = "/media/zz/new/myMidImg/" + dataset_name + "/out.txt"
         file_outcome = "/media/zz/new/myMidImg/result_osk/" + dataset_name + ".txt"
 
-        tp_result = pr.find_true_positive_outcome(file_gt_sens_poses, file_outcome, 15)
+        tp_result = pr.find_true_positive_outcome(file_gt_sens_poses, file_outcome, thres_dist=15, thres_score= 0.25)
         gt_dic = pr.get_gt_sens_pose_dictionary(file_gt_sens_poses)
 
         translation_err_list = []  # List to store translation errors

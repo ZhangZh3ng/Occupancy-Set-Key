@@ -2,6 +2,8 @@
 #include <chrono>
 #include <iostream>
 #include <thread>
+#include <csignal>
+#include <unistd.h>
 
 #include <nav_msgs/Path.h>
 #include <pcl/common/transforms.h>
@@ -58,16 +60,20 @@ ros::Publisher pub_tp_points;
 ros::Publisher pub_fp_points;
 ros::Publisher pub_fn_points;
 
+bool flag_termiate = false;
+
+void SignalHandler(int signum) {
+  flag_termiate = true;
+  std::cout << "Interrupt signal (" << signum << ") received.\n";
+  // exit(signum);
+}
+
 std::atomic<bool> is_running{false};
 void PauseControl() {
-  while (ros::ok()) {
-    char input;
-    std::cin >> input;
-
-    if (input == 'p') {
-      is_running = false;
-    } else if (input == 'r') {
-      is_running = true;
+  char c;
+  while (ros::ok() && flag_termiate == false && read(STDIN_FILENO, &c, 1) == 1) {
+    if (c == ' ') {
+      is_running = !is_running;
     }
 
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
@@ -462,7 +468,7 @@ void RunOSKSearch() {
 
   std::cout << "write ok." << std::endl;
 
-  while (ros::ok()) {
+  while (ros::ok() && flag_termiate == false) {
     // current
     PublishCloud(*cloud_this, pub_cloud_this, header);
     PublishCloud(*cloud_object, pub_object, header);
@@ -489,6 +495,7 @@ void RunOSKSearch() {
 int main(int argc, char** argv) {
   ros::init(argc, argv, "run_osk");
   ros::NodeHandle nh;
+  signal(SIGINT, SignalHandler);
 
   nh.param<std::string>("lidar_info_path", lidar_info_path, "");
 
