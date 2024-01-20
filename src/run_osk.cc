@@ -68,7 +68,7 @@ void SignalHandler(int signum) {
   // exit(signum);
 }
 
-std::atomic<bool> is_running{false};
+std::atomic<bool> is_running{true};
 void PauseControl() {
   char c;
   while (ros::ok() && flag_termiate == false && read(STDIN_FILENO, &c, 1) == 1) {

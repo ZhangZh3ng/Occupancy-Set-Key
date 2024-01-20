@@ -10,12 +10,12 @@ if __name__ == "__main__":
     file_outcome_osk = "/media/zz/new/myMidImg/result_osk/kitti360_00_1.txt"
     file_outcome_sc = "/media/zz/new/myMidImg/result_osk/kitti360_00_2.txt"
     file_outcome_iris = "/media/zz/new/myMidImg/result_osk/kitti360_00_3.txt"
-    file_outcome_cont2 = "/media/zz/new/myMidImg/result_osk/kitti360_00.txt"
+    file_outcome_cont2 = "/media/zz/new/myMidImg/result_osk/kitti360_00_4.txt"
     file_outcome_5 = "/media/zz/new/myMidImg/result_osk/kitti360_00_5.txt"
 
     fig_save_folder = "/home/zz/桌面/fig/multi"
 
-    dataset_name = "kitti360_00"
+    dataset_name = "kitti_00"
     thres_dist = 15.0
     thres_frame_dist = 150
 
@@ -48,6 +48,7 @@ if __name__ == "__main__":
     ]
 
     title = dataset_name + "  th:" + str(thres_dist) + "m"
+    title = ""
 
     fig = pr.plot_pr_curves(pr_results, data_names, title,use_label_mark=True)
 

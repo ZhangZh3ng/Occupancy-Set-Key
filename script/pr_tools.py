@@ -100,7 +100,9 @@ def read_loop_detction_result(file_path):
             result.append([idx_curr, idx_best, score, dist])
     return result
 
-
+'''
+Since Contour Context has it unique output file in its origin project, we just use it.
+'''
 def read_loop_detction_result_cont2(file_path):
     result = []
     with open(file_path, "r") as f1:
@@ -580,10 +582,8 @@ def plot_pr_curves(pr_datas, curve_names, image_title="outcome", use_legend=True
         ax = axes
 
         if use_label_mark: 
-            ax.set_xlabel('Recall', fontsize=16)
-            ax.set_ylabel('Precision', fontsize=16)
-        # plt.xlabel('X Label', fontsize=14)  # Adjust the fontsize as needed
-        # plt.ylabel('Y Label', fontsize=14)  # Adjust the fontsize as needed
+            ax.set_xlabel('Recall', fontsize=30)
+            ax.set_ylabel('Precision', fontsize=30)
 
         ax.set_xlim([0, 1.02])
         ax.set_ylim([0, 1.02])
@@ -591,7 +591,7 @@ def plot_pr_curves(pr_datas, curve_names, image_title="outcome", use_legend=True
         ax.set_title(image_title)
         ax.tick_params(axis="y", direction="in")
         ax.tick_params(axis="x", direction="in")
-        ax.tick_params(axis='both', which='major', labelsize=18)
+        ax.tick_params(axis='both', which='major', labelsize=28, labelrotation=10)
 
         used_names = []
         used_colors = []
@@ -599,12 +599,12 @@ def plot_pr_curves(pr_datas, curve_names, image_title="outcome", use_legend=True
         for j, data1 in enumerate(pr_datas):
             if data1[i].size == 0:
                 continue
-            ax.plot(data1[i][:, 0], data1[i][:, 1], color="C%d" % (9 - j))
+            ax.plot(data1[i][:, 0], data1[i][:, 1], color="C%d" % (9 - j), linewidth=3)
             used_names.append(curve_names[j])
             used_colors.append("C%d" % (9 - j))
 
         if use_legend :
-            ax.legend(used_names, loc=3)
+            ax.legend(used_names, loc=3, fontsize=24)
 
     return fig
 
@@ -614,7 +614,7 @@ def visualize_pr_trajectory(trajectory, title="", use_legend=True, use_grid=True
     lines = []
     colors = []
     fig = plt.figure(figsize=(12, 9))
-    fig.patch.set_facecolor('none')  # Set the background color to transparent
+    # fig.patch.set_facecolor('none')  # Set the background color to transparent
 
     for i in range(len(trajectory) - 1):
         line_points = np.array([[trajectory[i][0], trajectory[i][1]], [
@@ -632,7 +632,7 @@ def visualize_pr_trajectory(trajectory, title="", use_legend=True, use_grid=True
 
     # Create a LineCollection
     line_segments = LineCollection(
-        lines, colors=[condition_colors[color] for color in colors], linewidths=2)
+        lines, colors=[condition_colors[color] for color in colors], linewidths=3)
 
     # Create a scatter plot for the endpoints (optional)
     endpoints_x = np.array([line[-1][0] for line in lines])
@@ -659,13 +659,15 @@ def visualize_pr_trajectory(trajectory, title="", use_legend=True, use_grid=True
         2: 'TN',
         3: 'FN'
     }
-    handles = [plt.Line2D([], [], marker='o', color='w', markersize=10,
+    handles = [plt.Line2D([], [], marker='o', color='w', markersize=20,
                           markerfacecolor=condition_colors[i], label=legend_labels[i]) for i in range(4)]
     if (use_legend) :
-        plt.legend(handles=handles, loc='upper left', fontsize=16)
+        plt.legend(handles=handles, loc='upper left', fontsize=24)
 
     # Add LineCollection to the plot
     plt.gca().add_collection(line_segments)
+
+    plt.tick_params(axis='both', which='major', labelsize=20)
 
     # Show plot
     # plt.show()

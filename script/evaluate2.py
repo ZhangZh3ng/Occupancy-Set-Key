@@ -18,7 +18,7 @@ if __name__ == "__main__":
 
         fig_save_folder = "/home/zz/桌面/fig/no_title"
 
-        # file_outcome_std = "/media/zz/new/myMidImg/result_std/kitti_00.txt"
+        # file_outcome_std = "/media/zz/new/myMidImg/result_ot/kitti_00.txt"
         # file_outcome_bow3d = "/media/zz/new/myMidImg/result_bow3d/kitti360_00.txt"
 
         thres_dist = 15.0

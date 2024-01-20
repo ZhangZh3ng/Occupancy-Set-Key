@@ -9,8 +9,8 @@ params = [
     {"l": 2, "b": 10},
     {"l": 6, "b": 10},
     {"l": 6, "b": 30},
-    # {"l": 10, "b": 20},
-    # {"l": 20, "b": 20},
+    {"l": 5, "b": 16},
+    {"l": 8, "b": 8},
     # {"l": 20, "b": 40},
     # {"l": 10, "b": 40},
     # {"l": 10, "b": 100},
@@ -31,8 +31,8 @@ for param in params:
     plt.plot(scores, probabilities, label=label, linewidth=4)
 
 # plt.title("Probability of sharing at least 1 same hash value")
-plt.xlabel("Jaccard similarity", fontsize=16)
-plt.ylabel("Probability", fontsize=16)
+plt.xlabel("Jaccard similarity", fontsize=16, fontweight='bold')
+plt.ylabel("Hit Probability", fontsize=16, fontweight='bold')
 plt.tick_params(axis='both', which='major', labelsize=18)
 # plt.grid()
 plt.legend(fontsize=16)
