@@ -1,8 +1,10 @@
 # Occupancy Set Key(OSK)
 
-Occupancy set key is a LiDAR based place recognition algorithm had been accepted by IEEE TIM.
+Occupancy set key is a LiDAR based place recognition algorithm had been accepted by IEEE TIM. 
 
-![image-20240123163634969](markdown-img/README.assets/image-20240123163634969.png)
+demo video: https://www.youtube.com/watch?v=4yEeCB2dhWg
+
+![image-20240123163634969](markdown-img/README.assets/image-20240123163634969.png)![image-20240222170802137](markdown-img/README.assets/image-20240222170802137.png)
 
 ## Feature
 
