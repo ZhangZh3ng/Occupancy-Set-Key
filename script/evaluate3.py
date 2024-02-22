@@ -5,13 +5,13 @@ from scipy.spatial import KDTree
 import pr_tools as pr
 
 if __name__ == "__main__":
-    file_gt_sens_poses = "/media/zz/new/myMidImg/kitti360_00/out.txt"
+    file_gt_sens_poses = "/media/zz/new/myMidImg/kitti_00/out.txt"
 
-    file_outcome_osk = "/media/zz/new/myMidImg/result_osk/kitti360_00_1.txt"
-    file_outcome_sc = "/media/zz/new/myMidImg/result_osk/kitti360_00_2.txt"
-    file_outcome_iris = "/media/zz/new/myMidImg/result_osk/kitti360_00_3.txt"
-    file_outcome_cont2 = "/media/zz/new/myMidImg/result_osk/kitti360_00_4.txt"
-    file_outcome_5 = "/media/zz/new/myMidImg/result_osk/kitti360_00_5.txt"
+    file_outcome_osk = "/media/zz/new/myMidImg/result_osk/kitti_00_1.txt"
+    file_outcome_sc = "/media/zz/new/myMidImg/result_osk/kitti_00_2.txt"
+    file_outcome_iris = "/media/zz/new/myMidImg/result_osk/kitti_00_3.txt"
+    file_outcome_cont2 = "/media/zz/new/myMidImg/result_osk/kitti_00_4.txt"
+    file_outcome_5 = "/media/zz/new/myMidImg/result_osk/kitti_00_5.txt"
 
     fig_save_folder = "/home/zz/桌面/fig/multi"
 
@@ -20,7 +20,7 @@ if __name__ == "__main__":
     thres_frame_dist = 150
 
     fig_name = dataset_name + "_" + str(int(thres_dist))
-    fig_path = fig_save_folder + "/" + fig_name + ".png"
+    fig_path = fig_save_folder + "/" + fig_name + ".eps"
     print(fig_name)
 
     print("Dataset: " + dataset_name + " thresh_dist: " + str(thres_dist))

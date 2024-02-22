@@ -1,6 +1,17 @@
 # Occupancy Set Key(OSK)
 
-## Run on KITTI
+Occupancy set key is a LiDAR based place recognition algorithm had been accepted by IEEE TIM.
+
+![image-20240123163634969](markdown-img/README.assets/image-20240123163634969.png)
+
+## Feature
+
+1. Introducing set based location descriptor, and using locality sensitive hashing trick, we convert the 3D environment around the landmark into several unique hash values.
+2. A simple but effective landmark selection strategy and by using RANSAC, algorithm can provide approximate 3DoF pose
+
+## How to use
+
+### Run on KITTI
 
 We use point cloud download from [Semantic KITTI](http://www.semantic-kitti.org/dataset.html)
 
@@ -17,14 +28,16 @@ We use point cloud download from [Semantic KITTI](http://www.semantic-kitti.org/
    <param name="result_save_path" type="string" value="xxx.txt" />
    ```
 
-3. In `shell/` run `run.sh`. The result will be saved in `result_save_path`
+3. in `shell/ folder ` run `./run.sh`. The result will be saved in `result_save_path`
 
-## Run On KITTI360
+### Run On KITTI360
 
 Official website of [KITTI360](https://www.cvlibs.net/datasets/kitti-360/). Please download `Raw Velodyne Scans`, `Calibrations` and `Vechicle Poses`
 
-1. The only difference with Run on KITTI is step 1, Please use `script/gt_kitti360.py` and set the four path according to your dataset's path
+1. The only difference with Run on KITTI is step 1, Please use `script/gt_kitti360.py` and set the four path according to your dataset's path.
 
-## Evaluation
+### Evaluation
+
+You can evaluate the performance(such as Precision-Recall) using the python script:
 
 In `script/evaluation.py`, set the `file_gt_sens_poses` using **xxx/out.txt** and set `file_outcome_osk` using the `result_save_path` then run this python script.

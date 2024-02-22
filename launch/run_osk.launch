@@ -1,6 +1,6 @@
 <launch> 
   <param name="lidar_info_path" type="string" value="/media/zz/new/myMidImg/kitti360_00/out.txt" />
-  <param name="result_save_path" type="string" value="/media/zz/new/myMidImg/result_osk/kitti360_00_8.txt" />
+  <param name="result_save_path" type="string" value="/media/zz/new/myMidImg/result_osk/kitti360_00_9.txt" />
   <param name="time_save_path" type="string" value="/media/zz/new/myMidImg/time/kitti360_00.txt" />
   <param name="descriptor_save_folder" type="string" value="/media/zz/new/myMidImg/result_osk/des" />
 
@@ -11,10 +11,10 @@
   <param name="landmark_range_threshold" type="double" value="40" />
   <param name="landmark_mask_radius" type="double" value="4" />
 
-  <param name="lsh_band_length" type="int" value="6" />
-  <param name="lsh_band_num" type="int" value="10" />
+  <param name="lsh_band_length" type="int" value="5" />
+  <param name="lsh_band_num" type="int" value="16" />
 
-  <param name="occupancy_context_max_range" type="double" value="30" />
+  <param name="occupancy_context_max_range" type="double" value="15" />
   <param name="occupancy_context_redius_resolution" type="double" value="1" />
   <param name="occupancy_context_angle_resolution" type="double" value="6" />
 

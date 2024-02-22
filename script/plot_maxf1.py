@@ -3,18 +3,18 @@ import matplotlib.pyplot as plt
 
 import pr_tools as pr
 
-file_gt_sens_poses = "/media/zz/new/myMidImg/kitti360_00/out.txt"
+file_gt_sens_poses = "/media/zz/new/myMidImg/kitti_00/out.txt"
 # file_outcome = "/media/zz/new/myMidImg/result_iris/kitti_00.txt"
-file_outcome = "/media/zz/new/myMidImg/result_logg3d/kitti360_00.txt"
-# file_outcome2 = "/media/zz/new/myMidImg/result_cont2/kitti360_00.txt"
-maxf1_score = 0.848916
+file_outcome = "/media/zz/new/myMidImg/result_logg3d/kitti_00.txt"
+# file_outcome2 = "/media/zz/new/myMidImg/result_cont2/kitti_00.txt"
+maxf1_score = 0.894851
 thres_dist = 15.0
 thres_frame_dist = 150
 
 flag_save_image = True
-image_save_folder = "/home/zz/桌面/fig/fig2/"
-image_name = "maxf1_kitti360_00_logg3d"
-full_image_path = image_save_folder + image_name + ".png"
+image_save_folder = "/media/zz/new/figure/"
+image_name = "maxf1_kitti_00_logg3d"
+full_image_path = image_save_folder + image_name + ".eps"
 
 outcome = pr.read_loop_detction_result(file_outcome)
 # outcome = pr.read_loop_detction_result_cont2(file_outcome2)

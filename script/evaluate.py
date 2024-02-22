@@ -19,7 +19,7 @@ if __name__ == "__main__":
     thres_frame_dist = 150
 
     fig_name = dataset_name + "_" + str(int(thres_dist))
-    fig_path = fig_save_folder + "/" + fig_name + ".png"
+    fig_path = fig_save_folder + "/" + fig_name + ".eps"
     print(fig_name)
 
     print("Dataset: " + dataset_name + " thresh_dist: " + str(thres_dist))
