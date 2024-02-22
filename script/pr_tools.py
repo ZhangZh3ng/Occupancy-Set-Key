@@ -43,6 +43,8 @@ def get_gt_sens_pose_dictionary(fpath_gt_sens_poses):
 def get_maxf1_idx(data):
     max_f1 = 0
     idx = -1
+    recall = 0
+    precision = 0
     max_pt = None
     for d in data:
         cur = 2 * d[0] * d[1] / (d[0] + d[1]) if (d[0] + d[1]) > 0 else 0
@@ -51,7 +53,9 @@ def get_maxf1_idx(data):
             max_f1 = cur
             idx = d[2]
             max_pt = d
-    return max_f1, idx
+            recall = d[0]
+            precision = d[1]
+    return max_f1, idx, recall, precision
 
 
 # AUC
@@ -212,7 +216,8 @@ def comput_pr_points_ts(fp_gt_sens_poses, outcome, thres_dist=10, thres_time=30)
 
 
 # Note: this function only work on sequence scan id, and the first scan id must be 0 that is consistent with our xxx.out.txt format
-def comput_pr_points(fp_gt_sens_poses, outcome, thres_dist=10, thres_frame_dist=300):
+def comput_pr_points(fp_gt_sens_poses, outcome, thres_dist=10, thres_frame_dist=300, method_name = "unknown"):
+    print("### " + method_name, ":")
     plots_data = []
     pr_points = []
 
@@ -277,8 +282,9 @@ def comput_pr_points(fp_gt_sens_poses, outcome, thres_dist=10, thres_frame_dist=
     print("AUC: %f" % auc)
 
     # get max F1
-    max_f1, f1_pose_idx = get_maxf1_idx(pr_points)
+    max_f1, f1_pose_idx, recall, precision = get_maxf1_idx(pr_points)
     print("Max F1 score: %f @%d " % (max_f1, int(f1_pose_idx)))
+    print("Recall:  %f, Precision %f" % (recall, precision))
 
     # calc rmse for scores above max f1 sim
     sim_thres = (outcome[int(f1_pose_idx)][2])
